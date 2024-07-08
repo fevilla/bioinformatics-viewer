@@ -1,5 +1,5 @@
 <template>
-    <div class="xl:flex flex-col w-60 h-dvh sticky top-0">
+    <div class="xl:flex flex-col w-60 h-dvh sticky top-0 shadow-md">
         <div class="flex flex-col gap-3 pt-12 pb-7 px-12">
             <div class="flex gap-3 text-gray-700 font-book">
                 <img src="~assets/images/logo.png" alt="" class="size-10 block" />
