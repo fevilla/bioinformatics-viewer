@@ -127,8 +127,6 @@ const calculateOne = (f, c) => {
 const NeedlemanWunsch = () => {
   // fix/verify if string are ADN and ARN
   submitting.value = false
-  cnt.value = 0
-  oneAligment = []
 
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
@@ -169,6 +167,13 @@ const NeedlemanWunsch = () => {
 </script>
 
 <style scoped>
+
+.link {
+  fill: none;
+  stroke: #555;
+  stroke-width: 1.5px;
+}
+
 .cell {
   border: 1px solid black;
   text-align: center;

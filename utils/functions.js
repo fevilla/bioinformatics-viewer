@@ -4,7 +4,7 @@ export const replaceCharAt = (str, i, c) => {
 };
 
 export const getColorByChar = (char) => {
-  switch (char) {
+  switch (char.toLowerCase()) {
     case 'a':
       return 'bg-green-500'; // Adenina
     case 't':
