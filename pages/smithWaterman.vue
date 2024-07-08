@@ -1,8 +1,8 @@
 <template>
-  <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Needleman Wunsch - Alineamiento global</h5>
+  <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Smith Waterman - Alineamiento local</h5>
   <div class="font-sans justify-center items-center p-6 flex">
     <div class="w-full max-w-5xl">
-      <form @submit.prevent="NeedlemanWunsch" class="rounded px-8 pt-6 pb-8 mb-4">
+      <form @submit.prevent="smithWaterman" class="rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
           <label for="seq1" class="block text-gray-700 text-sm font-bold mb-2">
             Secuencia 1:
@@ -102,7 +102,7 @@ let oneAligment = []
 const calculate = (f, c, str0, str1, seq1, seq2) => {
   if (cnt.value >= 100) return
 
-  if (f <= 0 && c <= 0) {
+  if (mx.value[f][c].first == 0) {
     cnt.value++;
     alignments.value.push({
       seq1: str0.split('').reverse().join(''),
@@ -110,40 +110,38 @@ const calculate = (f, c, str0, str1, seq1, seq2) => {
     });
     return
   }
-
   if (mx.value[f][c].second[0] === '1') calculate(f - 1, c - 1, str0 + seq1[f], str1 + seq2[c], seq1, seq2)
-  if (mx.value[f][c].second[1] === '1') calculate(f - 1, c, str0 + seq1[f], str1 + '-', seq1, seq2)
-  if (mx.value[f][c].second[2] === '1') calculate(f, c - 1, str0 + '-', str1 + seq2[c], seq1, seq2)
 }
 
 const calculateOne = (f, c) => {
   if (f <= 0 && c <= 0) return
   oneAligment.push({ i: f, j: c });
   if (mx.value[f][c].second[0] === '1') calculateOne(f - 1, c - 1)
-  else if (mx.value[f][c].second[1] === '1') calculateOne(f - 1, c)
-  else if (mx.value[f][c].second[2] === '1') calculateOne(f, c - 1)
 }
 
-const NeedlemanWunsch = () => {
+const smithWaterman = () => {
   // fix/verify if string are ADN and ARN
   submitting.value = false
+  cnt.value = 0
+  oneAligment = []
 
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
   let lenSeq2 = seq2.length
-
+  let scores = []
+  let s
 
   mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
   alignments.value = []
 
   for (let i = 1; i < lenSeq1; i++) {
-    mx.value[i][0].first = mx.value[i - 1][0].first - 2
+    mx.value[i][0].first = 0
     mx.value[i][0].second = replaceCharAt(mx.value[i][0].second, 1, '1')
   }
 
   for (let i = 1; i < lenSeq2; i++) {
-    mx.value[0][i].first = mx.value[0][i - 1].first - 2;
+    mx.value[0][i].first = 0;
     mx.value[0][i].second = replaceCharAt(mx.value[0][i].second, 2, '1')
   }
 
@@ -152,28 +150,30 @@ const NeedlemanWunsch = () => {
       const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : -1);
       const b = mx.value[i - 1][j].first - 2;
       const c = mx.value[i][j - 1].first - 2;
-      const r = Math.max(a, Math.max(b, c));
+      const d = 0;
+      const r = Math.max(a, b, c, d);
+      scores.push({ i: i, j: j })
+
       mx.value[i][j].first = r;
       mx.value[i][j].second = (r === a ? '1' : '0') + (r === b ? '1' : '0') + (r === c ? '1' : '0');
     }
   }
-  score.value = mx.value[lenSeq1 - 1][lenSeq2 - 1].first;
+  scores.sort((a, b) => mx.value[b.i][b.j].first - mx.value[a.i][a.j].first);
+  console.log(scores)
 
-  calculate(lenSeq1 - 1, lenSeq2 - 1, '', '', seq1, seq2)
-  calculateOne(lenSeq1 - 1, lenSeq2 - 1)
-  oneAligment.push({ i: 0, j: 0 })
+  for (s of scores) {
+    calculate(s.i, s.j, '', '', seq1, seq2);
+    if (cnt.value == 1) {
+      score.value = mx.value[s.i][s.j].first;
+      break;
+    }
+  }
+  calculateOne(s.i, s.j)
   submitting.value = true
 }
 </script>
 
 <style scoped>
-
-.link {
-  fill: none;
-  stroke: #555;
-  stroke-width: 1.5px;
-}
-
 .cell {
   border: 1px solid black;
   text-align: center;
