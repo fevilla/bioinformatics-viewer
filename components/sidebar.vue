@@ -22,6 +22,11 @@
                 active-class="active">
                 <div>Alineamiento multiple</div>
             </nuxt-link>
+            <nuxt-link to="/clusters"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Clustering</div>
+            </nuxt-link>
         </div>
     </div>
 </template>
