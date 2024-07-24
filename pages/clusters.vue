@@ -93,7 +93,7 @@ function dendrogram(data, options = {}) {
     .attr("viewBox", [0, 0, width, innerHeight])
     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-  var clusterLayout = d3.cluster().size([width - paddingLeft * 2, innerHeight]);
+  let clusterLayout = d3.cluster().size([width - paddingLeft * 2, innerHeight]);
 
   const root = d3.hierarchy(data);
   const maxHeight = root.data.height;
