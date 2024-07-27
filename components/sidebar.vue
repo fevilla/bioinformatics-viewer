@@ -22,6 +22,21 @@
                 active-class="active">
                 <div>Alineamiento multiple</div>
             </nuxt-link>
+            <nuxt-link to="/pointMatrix"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Matriz de puntos</div>
+            </nuxt-link>
+            <nuxt-link to="/blosum"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Alinemiento global de proteinas</div>
+            </nuxt-link>
+            <nuxt-link to="/watsonCrick"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Watson Crick</div>
+            </nuxt-link>
         </div>
     </div>
 </template>

@@ -104,6 +104,7 @@ const calculate = (f, c, str0, str1, seq1, seq2) => {
 
   if (f <= 0 && c <= 0) {
     cnt.value++;
+    if (cnt.value >= 5) return
     alignments.value.push({
       seq1: str0.split('').reverse().join(''),
       seq2: str1.split('').reverse().join('')
@@ -167,7 +168,6 @@ const NeedlemanWunsch = () => {
 </script>
 
 <style scoped>
-
 .link {
   fill: none;
   stroke: #555;

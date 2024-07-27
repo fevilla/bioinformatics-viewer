@@ -32,16 +32,17 @@
   <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
     <h5>Cantidad de Alineamientos {{ cnt }}</h5>
     <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
-      <label class="block text-gray-700 text-sm font-bold mr-5">
+      <!-- <label class="block text-gray-700 text-sm font-bold mr-5">
         Alineamiento {{ index + 1 }}:
-      </label>
+      </label> -->
       <table>
         <tbody>
           <tr>
+            {{ seq1Input.substring(0, positionAlignment[0]) }}
             <td v-for="(char, idx) in alignment.seq1" :key="'seq1-' + idx" :class="getColorByChar(char)"
               class="cellAlignment">
               {{ char }}
-            </td>
+            </td> {{ seq1Input.substring(positionAlignment[0] + score.value, seq1Input.length) }}
           </tr>
           <tr>
             <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" :class="getColorByChar(char)"
@@ -97,6 +98,7 @@ const alignments = ref([])
 const mx = ref([])
 const cnt = ref(0)
 const score = ref(0)
+let positionAlignment = ([])
 let oneAligment = []
 
 const calculate = (f, c, str0, str1, seq1, seq2) => {
@@ -114,7 +116,11 @@ const calculate = (f, c, str0, str1, seq1, seq2) => {
 }
 
 const calculateOne = (f, c) => {
-  if (f <= 0 && c <= 0) return
+  if (mx.value[f][c].first == 0) {
+    positionAlignment.push(f)
+    positionAlignment.push(c)
+    return
+  }
   oneAligment.push({ i: f, j: c });
   if (mx.value[f][c].second[0] === '1') calculateOne(f - 1, c - 1)
 }
