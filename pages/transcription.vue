@@ -30,7 +30,27 @@
             </div>
         </div>
     </div>
-
+    <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
+        <label class="block text-gray-700 text-sm font-bold mr-5">
+            Transcripcion:
+        </label>
+        <table>
+            <tbody>
+                <tr>
+                    <td v-for="(char, idx) in seq1Input" :key="'seq1-' + idx" :class="getColorByChar(char)"
+                        class="cellAlignment">
+                        {{ char }}
+                    </td>
+                </tr>
+                <tr>
+                    <td v-for="(char, idx) in ans" :key="'seq2-' + idx" :class="getColorByChar(char)"
+                        class="cellAlignment">
+                        {{ char }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script setup>

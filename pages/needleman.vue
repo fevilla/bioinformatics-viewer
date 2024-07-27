@@ -61,9 +61,11 @@
   <div v-if="submitting" class="font-sans">
     <div class="justify-center items-center p-6 flex flex-col">
       <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
-        <label class="block text-gray-700 text-sm font-bold mr-5">
-          Alineamiento {{ index + 1 }}:
-        </label>
+        <div>
+          <label class="block text-gray-700 text-sm font-bold mr-5">
+            Alineamiento {{ index + 1 }}:
+          </label>
+        </div>
         <table>
           <tbody>
             <tr>
@@ -135,15 +137,14 @@ const type = ref(null);
 const errors = ref({});
 
 const calculate = (f, c, str0, str1, seq1, seq2) => {
-  if (cnt.value >= 100) return
-
   if (f <= 0 && c <= 0) {
     cnt.value++;
-    if (cnt.value >= 5) return
-    alignments.value.push({
-      seq1: str0.split('').reverse().join(''),
-      seq2: str1.split('').reverse().join('')
-    });
+    if (cnt.value <= 5) {
+      alignments.value.push({
+        seq1: str0.split('').reverse().join(''),
+        seq2: str1.split('').reverse().join('')
+      });
+    }
     return
   }
 

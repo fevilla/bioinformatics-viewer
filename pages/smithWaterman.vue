@@ -59,23 +59,21 @@
     </div>
   </div>
   <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-    <h5>Cantidad de Alineamientos {{ cnt }}</h5>
     <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
-      <!-- <label class="block text-gray-700 text-sm font-bold mr-5">
+      <label class="block text-gray-700 text-sm font-bold mr-5">
         Alineamiento {{ index + 1 }}:
-      </label> -->
+      </label>
       <table>
         <tbody>
           <tr>
-            {{ seq1Input.substring(0, positionAlignment[0]) }}
-            <td v-for="(char, idx) in alignment.seq1" :key="'seq1-' + idx" :class="getColorByChar(char)"
-              class="cellAlignment">
+            <td v-for="(char, idx) in alignment.seq1" :key="'seq1-' + idx"
+              :class="getClassByIndexSeq(char, idx, index, 0)" class="cellAlignment">
               {{ char }}
-            </td> {{ seq1Input.substring(positionAlignment[0] + score.value, seq1Input.length) }}
+            </td>
           </tr>
           <tr>
-            <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" :class="getColorByChar(char)"
-              class="cellAlignment">
+            <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx"
+              :class="getClassByIndexSeq(char, idx, index, 1)" class="cellAlignment">
               {{ char }}
             </td>
           </tr>
@@ -84,7 +82,6 @@
     </div>
   </div>
   <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-    <h5>Maximo score: {{ score }}</h5>
     <div class="text-xs overflow-x-auto shadow-md rounded-lg">
       <table class="min-w-max w-full">
         <thead class="bg-blue-600 text-white">
@@ -129,58 +126,77 @@ const alignments = ref([]);
 const mx = ref([]);
 const cnt = ref(0);
 const score = ref(0);
-let oneAligment = [];
 const type = ref(null);
-const errors = ref({});
-let positionAlignment = ([])
+const errors = ref({})
+const maxLen = ref(null);
+let positionAlignment = []
+let positionAlignmentFig = []
+let oneAligment = [];
 
-
-
-const calculate = (f, c, str0, str1, seq1, seq2) => {
-  if (cnt.value >= 100) return
+const calculate = (f, c, str0, str1, seq1, seq2, score) => {
+  for (let i = 0; i < score; i++) {
+    if (mx.value[f][c].second[0] === '1') {
+      f--;
+      c--;
+    }
+  }
 
   if (mx.value[f][c].first == 0) {
     cnt.value++;
-    alignments.value.push({
-      seq1: str0.split('').reverse().join(''),
-      seq2: str1.split('').reverse().join('')
-    });
-    return
+    if (cnt.value <= 5) {
+      positionAlignment.push({ i: f + 1, j: c + 1 });
+    }
   }
-  if (mx.value[f][c].second[0] === '1') calculate(f - 1, c - 1, str0 + seq1[f], str1 + seq2[c], seq1, seq2)
 }
 
-const calculateOne = (f, c) => {
-  if (mx.value[f][c].first == 0) {
-    positionAlignment.push(f)
-    positionAlignment.push(c)
-    return
+const getClassByIndexSeq = (char, idx, index, q) => {
+  let a = positionAlignmentFig[index]
+  if (char == '-') return 'text-white';
+  if (idx >= a && idx < a + score.value) return getColorByChar(char);
+  return '';
+}
+
+const calculateOne = () => {
+  let a = positionAlignment[0].i
+  let b = positionAlignment[0].j
+  let c = score.value;
+
+  for (let i = 0; i < c; i++) {
+    oneAligment.push({ i: a, j: b })
+    a++;
+    b++;
   }
-  oneAligment.push({ i: f, j: c });
-  if (mx.value[f][c].second[0] === '1') calculateOne(f - 1, c - 1)
+}
+
+function padStartCustom(sequence, maxLength) {
+  const lengthToAdd = maxLength - sequence.length;
+  if (lengthToAdd > 0) return '-'.repeat(lengthToAdd) + sequence;
+  return sequence;
 }
 
 const smithWaterman = () => {
   submitting.value = false
   seq1Input = seq1Input.toLowerCase();
   seq2Input = seq2Input.toLowerCase();
+  positionAlignment = []
+  positionAlignmentFig = []
+  oneAligment = [];
   errors.value = {}
-
+  alignments.value = []
 
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
   let lenSeq2 = seq2.length
 
-  cnt.value = 0
-  oneAligment = []
-  let scores = []
+  maxLen.value = Math.max(lenSeq1, lenSeq2)
 
+  cnt.value = 0
+  let scores = []
   mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
   alignments.value = []
 
   if (validateInputs([seq1Input, seq2Input], errors)) return
-
   type.value = determineType(seq1Input)
 
   for (let i = 1; i < lenSeq1; i++) {
@@ -195,9 +211,9 @@ const smithWaterman = () => {
 
   for (let i = 1; i < lenSeq1; i++) {
     for (let j = 1; j < lenSeq2; j++) {
-      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : -1);
-      const b = mx.value[i - 1][j].first - 2;
-      const c = mx.value[i][j - 1].first - 2;
+      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : mismatchPenalty.value);
+      const b = mx.value[i - 1][j].first + gapPenalty.value;
+      const c = mx.value[i][j - 1].first + gapPenalty.value;
       const d = 0;
       const r = Math.max(a, b, c, d);
       scores.push({ i: i, j: j })
@@ -207,15 +223,39 @@ const smithWaterman = () => {
     }
   }
   scores.sort((a, b) => mx.value[b.i][b.j].first - mx.value[a.i][a.j].first);
-  let s;
+
+  let s
+  score.value = mx.value[scores[0].i][scores[0].j].first
+
   for (s of scores) {
-    calculate(s.i, s.j, '', '', seq1, seq2);
-    if (cnt.value == 1) {
-      score.value = mx.value[s.i][s.j].first;
+    if (score.value === 0) break;
+    console.log(s, mx.value[s.i][s.j].first, cnt.value)
+    if (cnt.value > 0 && score.value !== mx.value[s.i][s.j].first) {
+      calculateOne()
       break;
     }
+    calculate(s.i, s.j, '', '', seq1, seq2, score.value);
+    score.value = mx.value[s.i][s.j].first;
   }
-  calculateOne(s.i, s.j)
+
+  if (positionAlignment.length > 0) {
+    let preSeq1, postSeq1, preSeq2, postSeq2, p;
+    for (p of positionAlignment) {
+      preSeq1 = seq1.substring(1, p.i)
+      preSeq2 = seq2.substring(1, p.j)
+      postSeq1 = seq1.substring(p.i + score.value, lenSeq1)
+      postSeq2 = seq2.substring(p.j + score.value, lenSeq2)
+      if (preSeq1.length < preSeq2.length) preSeq1 = padStartCustom(preSeq1, preSeq2.length)
+      else preSeq2 = padStartCustom(preSeq2, preSeq1.length)
+      if (postSeq1.length < postSeq2.length) postSeq1 = postSeq1.padEnd(postSeq2.length, '-');
+      else postSeq2 = postSeq2.padEnd(postSeq1.length, '-');
+      alignments.value.push({
+        seq1: preSeq1 + seq1.substring(p.i, p.i + score.value) + postSeq1,
+        seq2: preSeq2 + seq2.substring(p.j, p.j + score.value) + postSeq2
+      });
+      positionAlignmentFig.push(preSeq1.length)
+    }
+  }
   submitting.value = true
 }
 </script>
@@ -241,3 +281,8 @@ const smithWaterman = () => {
   min-width: 30px;
 }
 </style>
+
+// alignments.value.push({
+// seq1: str0.split('').reverse().join(''),
+// seq2: str1.split('').reverse().join('')
+// });

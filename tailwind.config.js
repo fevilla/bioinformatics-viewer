@@ -61,7 +61,7 @@ module.exports = {
         800: '#0E5814',
         900: '#05400A',
       },
-      purple: '#3B0066',
+      purple: '#45B39D',
       yellow: '#FDBF07',
       orange: '#FF6B01',
       white: '#FFFFFF',

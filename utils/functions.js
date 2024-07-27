@@ -45,6 +45,8 @@ export const getColorByChar = (char) => {
       return 'bg-linen-green'; // Tirosina
     case 'v':
       return 'bg-light-maroon'; // Valina
+    case 'u':
+      return 'bg-purple'; //
     default:
       return 'bg-gray-500'; // Default para cualquier otro carácter
   }
