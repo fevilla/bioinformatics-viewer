@@ -19,6 +19,22 @@
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required>
         </div>
+        <div class="mb-4">
+          <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+            Penalidad por gap:
+          </label>
+          <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required>
+        </div>
+        <div class="mb-4">
+          <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+            Penalidad por mismatch:
+          </label>
+          <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number" placeholder="Penalidad por mismatch"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required>
+        </div>
         <div class="flex items-center justify-between">
           <button
             class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -90,14 +106,16 @@
 
 <script setup>
 
-let seq1Input = ''
-let seq2Input = ''
-const submitting = ref(false)
-const alignments = ref([])
-const mx = ref([])
-const cnt = ref(0)
-const score = ref(0)
-let oneAligment = []
+let seq1Input = '';
+let seq2Input = '';
+const gapPenalty = ref(-2);
+const mismatchPenalty = ref(-1);
+const submitting = ref(false);
+const alignments = ref([]);
+const mx = ref([]);
+const cnt = ref(0);
+const score = ref(0);
+let oneAligment = [];
 
 const calculate = (f, c, str0, str1, seq1, seq2) => {
   if (cnt.value >= 100) return
@@ -127,8 +145,10 @@ const calculateOne = (f, c) => {
 
 const NeedlemanWunsch = () => {
   // fix/verify if string are ADN and ARN
+  cnt.value = 0
   submitting.value = false
-
+  oneAligment = [];
+  
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
@@ -139,20 +159,20 @@ const NeedlemanWunsch = () => {
   alignments.value = []
 
   for (let i = 1; i < lenSeq1; i++) {
-    mx.value[i][0].first = mx.value[i - 1][0].first - 2
+    mx.value[i][0].first = mx.value[i - 1][0].first + gapPenalty.value;
     mx.value[i][0].second = replaceCharAt(mx.value[i][0].second, 1, '1')
   }
 
   for (let i = 1; i < lenSeq2; i++) {
-    mx.value[0][i].first = mx.value[0][i - 1].first - 2;
+    mx.value[0][i].first = mx.value[0][i - 1].first + gapPenalty.value;
     mx.value[0][i].second = replaceCharAt(mx.value[0][i].second, 2, '1')
   }
 
   for (let i = 1; i < lenSeq1; i++) {
     for (let j = 1; j < lenSeq2; j++) {
-      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : -1);
-      const b = mx.value[i - 1][j].first - 2;
-      const c = mx.value[i][j - 1].first - 2;
+      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : mismatchPenalty.value);
+      const b = mx.value[i - 1][j].first + gapPenalty.value;
+      const c = mx.value[i][j - 1].first + gapPenalty.value;
       const r = Math.max(a, Math.max(b, c));
       mx.value[i][j].first = r;
       mx.value[i][j].second = (r === a ? '1' : '0') + (r === b ? '1' : '0') + (r === c ? '1' : '0');

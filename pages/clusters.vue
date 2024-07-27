@@ -1,29 +1,71 @@
 <template>
-  <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Needleman Wunsch - Alineamiento global</h5>
-  <div class="flex justify-center" ref="dendrograma">
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold text-center mb-4">Clustering Jerárquico</h1>
+    <div class="flex justify-center mb-4">
+      <label for="method" class="mr-2">Seleccione el método de aglomeración:</label>
+      <select id="method" v-model="selectedMethod" @change="generateDendrogram">
+        <option value="max">Máximo (Complete Linkage)</option>
+        <option value="min">Mínimo (Single Linkage)</option>
+        <option value="avg">Promedio (Average Linkage)</option>
+      </select>
+    </div>
+    <div class="flex justify-center mb-4">
+      <textarea v-model="distanceMatrixInput" placeholder="Introduce la matriz de distancias" class="w-full h-40 p-2 border"></textarea>
+    </div>
+    <div class="flex justify-center">
+      <button @click="parseMatrix" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">Generar Dendrograma</button>
+    </div>
+    <div ref="dendrogramContainer" class="flex justify-center mt-4"></div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import * as d3 from 'd3';
 import { agnes } from 'ml-hclust';
 
-const dendrograma = ref(null);
+const dendrogramContainer = ref(null);
+const selectedMethod = ref('max');
+const distanceMatrixInput = ref('');
+
+const generateDendrogram = () => {
+  const matrix = parseMatrix();
+  if (!matrix) return;
+
+  const method = selectedMethod.value;
+
+  let methodFunction;
+  switch (method) {
+    case 'max':
+      methodFunction = 'complete';
+      break;
+    case 'min':
+      methodFunction = 'single';
+      break;
+    case 'avg':
+      methodFunction = 'average';
+      break;
+  }
+
+  const result = agnes(matrix, { method: methodFunction, isDistanceMatrix: true });
+  const svgElement = dendrogram(result, { h: 2.5 });
+  dendrogramContainer.value.innerHTML = ''; // Limpiar el contenedor
+  dendrogramContainer.value.appendChild(svgElement);
+};
+
+const parseMatrix = () => {
+  try {
+    const matrix = distanceMatrixInput.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
+    if (matrix.some(row => row.some(isNaN))) throw new Error('Invalid matrix');
+    return matrix;
+  } catch (error) {
+    alert('Por favor, ingrese una matriz de distancias válida.');
+    return null;
+  }
+};
 
 onMounted(() => {
-  const data = [
-    [1, 2],
-    [2, 3],
-    [5, 8],
-    [8, 8],
-    [1, 2.5],
-    [3, 2],
-    [8, 9]
-  ];
-
-  const result = agnes(data);
-  const svgElement = dendrogram(result, { h: 2.5 });
-  dendrograma.value.appendChild(svgElement);
+  generateDendrogram();
 });
 
 function dendrogram(data, options = {}) {
@@ -51,7 +93,7 @@ function dendrogram(data, options = {}) {
     .attr("viewBox", [0, 0, width, innerHeight])
     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-  var clusterLayout = d3.cluster().size([width - paddingLeft * 2, innerHeight]);
+  let clusterLayout = d3.cluster().size([width - paddingLeft * 2, innerHeight]);
 
   const root = d3.hierarchy(data);
   const maxHeight = root.data.height;
@@ -152,12 +194,16 @@ function dendrogram(data, options = {}) {
       transformY(d.target)
     );
   }
-
   return svg.node();
 }
 </script>
 
 <style scoped>
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .axis text {
   font-family: "Inter, sans-serif";
 }

@@ -37,6 +37,16 @@
                 active-class="active">
                 <div>Watson Crick</div>
             </nuxt-link>
+            <nuxt-link to="/clusters"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Clustering</div>
+            </nuxt-link>
+            <nuxt-link to="/filogenetic"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Philogenetic</div>
+            </nuxt-link>
         </div>
     </div>
 </template>

@@ -122,6 +122,7 @@ export default {
       const alignedSequences = this.multipleSequenceAlignment(sequences, starIndex);
       this.alignedSequences = alignedSequences;
     },
+
     alignPair(seq1, seq2) {
       const m = seq1.length;
       const n = seq2.length;
@@ -160,8 +161,22 @@ export default {
           --j;
         }
       }
+
+      while (i > 0) {
+        console.log("i:", i)
+        alignedSeq1 = seq1[i - 1] + alignedSeq1;
+        --i;
+      }
+
+      while (j > 0) {
+        console.log("j: ", j)
+        alignedSeq1 = '-' + alignedSeq1;
+        alignedSeq2 = seq2[j - 1] + alignedSeq2;
+        --j;
+      }
       return [alignedSeq1, alignedSeq2];
     },
+
 
     balanceSequence(s1, s2) {
       let maxS, minS;
@@ -175,21 +190,29 @@ export default {
 
       let i = 0, j = 0;
       let ans = '';
-      while (j < maxS.length || i < minS.length) {
-        if (maxS[j] === minS[i] && maxS[j] !== '-') {
+      while (j < maxS.length) {
+        if (maxS[j] === minS[i]) {
           ans += maxS[j];
           i++;
           j++;
-        } else if (maxS[j] === '-') {
+        } else {
           ans += '-';
-          j++;
-        } else if (minS[i] === '-') {
-          ans += '-';
-          i++;
+          if (maxS[j] === '-') {
+            j++;
+          }
+          else {
+            i++;
+          }
         }
+      }
+
+      while (i < minS.length) {
+        ans += minS[i];
+        i++;
       }
       return ans;
     },
+
     getAlignment(s1, s2, s3) {
       let ans = '';
       let i = 0;
@@ -202,6 +225,7 @@ export default {
       }
       return ans;
     },
+
     multipleSequenceAlignment(sequences, starIndex) {
       const n = sequences.length;
       const alignedSequences = [];
@@ -213,13 +237,26 @@ export default {
       }
 
       let balance = alignedSequences[0][0];
+      console.log("Alineciones guardadas: ", alignedSequences)
       for (let i = 1; i < n - 1; i++) {
+        if (balance === alignedSequences[i][0]) continue;
         balance = this.balanceSequence(balance, alignedSequences[i][0]);
       }
-
+      console.log("Alineciones guardadas despues: ", alignedSequences)
+      console.log("STAR: ", balance)
       const result = [balance];
       for (let i = 0; i < n - 1; i++) {
-        const r = this.getAlignment(balance, alignedSequences[i][1], alignedSequences[i][0]);
+        let r = '';
+        let m = 0;
+        for (const element of balance) {
+          if (element === alignedSequences[i][0][m]) {
+            r += alignedSequences[i][1][m++];
+          }
+          else {
+            r += '-';
+          }
+          console.log("Alineado: ", r);
+        }
         result.push(r);
       }
       return result;

@@ -17,3 +17,6 @@ export const getColorByChar = (char) => {
       return 'bg-gray-500'; // Default para cualquier otro carácter
   }
 };
+
+export const is_arn = (sequence) => { return /^[ACGUacgu]+$/.test(sequence);}
+export const is_adn = (sequence) => { return /^[ACGTacgt]+$/.test(sequence);}
