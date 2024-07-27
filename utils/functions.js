@@ -139,18 +139,13 @@ export const validateInputs = (sequences, errors) => {
 };
 
 export const transcription = (dnaSequence) => {
-  const type = determineType(dnaSequence);
-  if (type !== 'DNA') {
-    return 'No es una cadena tipo ADN';
-  }
-
   let rnaSequence = [];
 
   for (let i = 0; i < dnaSequence.length; i++) {
-    if (dnaSequence[i] === 'G') rnaSequence.push('C');
-    else if (dnaSequence[i] === 'T') rnaSequence.push('A');
-    else if (dnaSequence[i] === 'C') rnaSequence.push('G');
-    else if (dnaSequence[i] === 'A') rnaSequence.push('U');
+    if (dnaSequence[i] === 'g') rnaSequence.push('c');
+    else if (dnaSequence[i] === 't') rnaSequence.push('a');
+    else if (dnaSequence[i] === 'c') rnaSequence.push('g');
+    else if (dnaSequence[i] === 'a') rnaSequence.push('u');
   }
 
   return rnaSequence.join('');

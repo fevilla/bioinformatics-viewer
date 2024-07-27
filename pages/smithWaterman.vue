@@ -1,7 +1,7 @@
 <template>
   <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Smith Waterman - Alineamiento local</h5>
-  <div class="font-sans justify-center items-center p-6 flex">
-    <div class="w-full max-w-5xl">
+  <div class="font-sans p-6 flex">
+    <div class="w-full max-w-sm">
       <form @submit.prevent="smithWaterman" class="rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
           <label for="seq1" class="block text-gray-700 text-sm font-bold mb-2">
@@ -10,12 +10,31 @@
           <input id="seq1" v-model="seq1Input" type="text" placeholder="Introduce la primera secuencia"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required>
+          <InputError :codeErrors="errors.seq1"></InputError>
         </div>
         <div class="mb-6">
           <label for="seq2" class="block text-gray-700 text-sm font-bold mb-2">
             Secuencia 2:
           </label>
           <input id="seq2" v-model="seq2Input" type="text" placeholder="Introduce la segunda secuencia"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required>
+          <InputError :codeErrors="errors.seq2"></InputError>
+        </div>
+        <div class="mb-4">
+          <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+            Penalidad por gap:
+          </label>
+          <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required>
+        </div>
+        <div class="mb-4">
+          <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+            Penalidad por mismatch:
+          </label>
+          <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number"
+            placeholder="Penalidad por mismatch"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required>
         </div>
@@ -26,7 +45,17 @@
             Computar alineamientos óptimos
           </button>
         </div>
+        <InputError :codeErrors="errors.type"></InputError>
       </form>
+    </div>
+    <div v-if="submitting" class="font-sans">
+      <div class="p-9 flex flex-col">
+        <h5><b>Secuencia 1:</b> {{ seq1Input }}</h5>
+        <h5><b>Secuencia 2:</b> {{ seq2Input }}</h5>
+        <h2><b>Tipo:</b> {{ type }}</h2>
+        <h5><b>Cantidad de Alineamientos:</b> {{ cnt }}</h5>
+        <h5><b>Score:</b> {{ score }}</h5>
+      </div>
     </div>
   </div>
   <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
@@ -90,16 +119,20 @@
 </template>
 
 <script setup>
-
 let seq1Input = ''
 let seq2Input = ''
-const submitting = ref(false)
-const alignments = ref([])
-const mx = ref([])
-const cnt = ref(0)
-const score = ref(0)
+
+const gapPenalty = ref(-2);
+const mismatchPenalty = ref(-1);
+const submitting = ref(false);
+const alignments = ref([]);
+const mx = ref([]);
+const cnt = ref(0);
+const score = ref(0);
+let oneAligment = [];
+const type = ref(null);
+const errors = ref({});
 let positionAlignment = ([])
-let oneAligment = []
 
 
 
@@ -128,20 +161,27 @@ const calculateOne = (f, c) => {
 }
 
 const smithWaterman = () => {
-  // fix/verify if string are ADN and ARN
   submitting.value = false
-  cnt.value = 0
-  oneAligment = []
+  seq1Input = seq1Input.toLowerCase();
+  seq2Input = seq2Input.toLowerCase();
+  errors.value = {}
+
 
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
   let lenSeq2 = seq2.length
+
+  cnt.value = 0
+  oneAligment = []
   let scores = []
-  let s
 
   mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
   alignments.value = []
+
+  if (validateInputs([seq1Input, seq2Input], errors)) return
+
+  type.value = determineType(seq1Input)
 
   for (let i = 1; i < lenSeq1; i++) {
     mx.value[i][0].first = 0
@@ -167,8 +207,7 @@ const smithWaterman = () => {
     }
   }
   scores.sort((a, b) => mx.value[b.i][b.j].first - mx.value[a.i][a.j].first);
-  console.log(scores)
-
+  let s;
   for (s of scores) {
     calculate(s.i, s.j, '', '', seq1, seq2);
     if (cnt.value == 1) {

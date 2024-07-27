@@ -1,7 +1,7 @@
 <template>
   <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Needleman Wunsch - Alineamiento global</h5>
-  <div class="font-sans justify-center items-center p-6 flex">
-    <div class="w-full max-w-5xl">
+  <div class="font-sans p-6 flex">
+    <div class="w-full max-w-sm">
       <form @submit.prevent="NeedlemanWunsch" class="rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
           <label for="seq1" class="block text-gray-700 text-sm font-bold mb-2">
@@ -48,13 +48,18 @@
         <InputError :codeErrors="errors.type"></InputError>
       </form>
     </div>
+    <div v-if="submitting" class="font-sans">
+      <div class="p-9 flex flex-col">
+        <h5><b>Secuencia 1:</b> {{ seq1Input }}</h5>
+        <h5><b>Secuencia 2:</b> {{ seq2Input }}</h5>
+        <h2><b>Tipo:</b> {{ type }}</h2>
+        <h5><b>Cantidad de Alineamientos:</b> {{ cnt }}</h5>
+        <h5><b>Score:</b> {{ score }}</h5>
+      </div>
+    </div>
   </div>
   <div v-if="submitting" class="font-sans">
-    <div class="p-9 flex flex-col">
-      <h2>Las cadenas son de tipo: {{ type }}</h2>
-    </div>
     <div class="justify-center items-center p-6 flex flex-col">
-      <h5>Cantidad de Alineamientos {{ cnt }}</h5>
       <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
         <label class="block text-gray-700 text-sm font-bold mr-5">
           Alineamiento {{ index + 1 }}:
@@ -78,7 +83,6 @@
       </div>
     </div>
     <div class="justify-center items-center p-6 flex flex-col">
-      <h5>Maximo score: {{ score }}</h5>
       <div class="text-xs overflow-x-auto shadow-md rounded-lg">
         <table class="min-w-max w-full">
           <thead class="bg-blue-600 text-white">
@@ -158,7 +162,6 @@ const calculateOne = (f, c) => {
 
 const NeedlemanWunsch = () => {
   submitting.value = false
-  console.log('type')
   seq1Input = seq1Input.toLowerCase();
   seq2Input = seq2Input.toLowerCase();
   errors.value = {}
@@ -177,9 +180,8 @@ const NeedlemanWunsch = () => {
   alignments.value = []
 
 
-  if (validateInputs([seq1Input, seq2Input], errors)) {
-    return
-  }
+  if (validateInputs([seq1Input, seq2Input], errors)) return
+
 
   type.value = determineType(seq1Input)
 

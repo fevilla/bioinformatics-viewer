@@ -7,6 +7,11 @@
             </div>
         </div>
         <div class="overflow-y-auto overflow-x-none overscroll-y-none flex-1 scrollbar-custom">
+            <nuxt-link to="/transcription"
+                class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
+                active-class="active">
+                <div>Transcripcion</div>
+            </nuxt-link>
             <nuxt-link to="/needleman"
                 class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
                 active-class="active">
