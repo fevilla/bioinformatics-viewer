@@ -101,6 +101,8 @@ const score = ref(0)
 let positionAlignment = ([])
 let oneAligment = []
 
+
+
 const calculate = (f, c, str0, str1, seq1, seq2) => {
   if (cnt.value >= 100) return
 

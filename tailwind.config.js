@@ -66,6 +66,14 @@ module.exports = {
       orange: '#FF6B01',
       white: '#FFFFFF',
       black: '#000000',
+      indigo: '#b3acf2',
+      'pink-light': '#fbcfe8',
+      'orange-light': '#FFD8A8',
+      'brown-light': '#D3B088', // Café claro personalizado
+      'purple-light': '#D6BCFA', // Morado claro personalizado
+      'yellow-light': '#FFF9C4', // Amarillo claro personalizado
+      'linen-green': '#F0F0E8', // Verde lino personalizado
+      'light-maroon': '#D7A9E3',
     },
     extend: {
       fontWeight: {

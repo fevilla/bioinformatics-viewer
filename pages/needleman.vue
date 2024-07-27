@@ -10,6 +10,7 @@
           <input id="seq1" v-model="seq1Input" type="text" placeholder="Introduce la primera secuencia"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required>
+          <InputError :codeErrors="errors.seq1"></InputError>
         </div>
         <div class="mb-6">
           <label for="seq2" class="block text-gray-700 text-sm font-bold mb-2">
@@ -18,6 +19,7 @@
           <input id="seq2" v-model="seq2Input" type="text" placeholder="Introduce la segunda secuencia"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required>
+          <InputError :codeErrors="errors.seq2"></InputError>
         </div>
         <div class="mb-4">
           <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
@@ -31,7 +33,8 @@
           <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
             Penalidad por mismatch:
           </label>
-          <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number" placeholder="Penalidad por mismatch"
+          <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number"
+            placeholder="Penalidad por mismatch"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required>
         </div>
@@ -42,72 +45,80 @@
             Computar alineamientos óptimos
           </button>
         </div>
+        <InputError :codeErrors="errors.type"></InputError>
       </form>
     </div>
   </div>
-  <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-    <h5>Cantidad de Alineamientos {{ cnt }}</h5>
-    <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
-      <label class="block text-gray-700 text-sm font-bold mr-5">
-        Alineamiento {{ index + 1 }}:
-      </label>
-      <table>
-        <tbody>
-          <tr>
-            <td v-for="(char, idx) in alignment.seq1" :key="'seq1-' + idx" :class="getColorByChar(char)"
-              class="cellAlignment">
-              {{ char }}
-            </td>
-          </tr>
-          <tr>
-            <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" :class="getColorByChar(char)"
-              class="cellAlignment">
-              {{ char }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <div v-if="submitting" class="font-sans">
+    <div class="p-9 flex flex-col">
+      <h2>Las cadenas son de tipo: {{ type }}</h2>
     </div>
-  </div>
-  <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-    <h5>Maximo score: {{ score }}</h5>
-    <div class="text-xs overflow-x-auto shadow-md rounded-lg">
-      <table class="min-w-max w-full">
-        <thead class="bg-blue-600 text-white">
-          <tr>
-            <th class="px-4 py-2 border bg-blue-200 border-blue-200 cell"></th>
-            <th class="px-4 py-2 border bg-blue-200 border-blue-200 cell">-</th>
-            <th class="px-4 py-2 border border-blue-800 cell" v-for="(char, index) in seq2Input" :key="'top-' + index">
-              {{ char }}
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white">
-          <tr v-for="(row, i) in mx" :key="'row-' + i">
-            <td class="px-4 py-2 border text-white bg-blue-200 border-blue-200 cell" v-if="i === 0">-</td>
-            <td class="px-4 py-2 border bg-blue-600 text-white cell" v-else>{{ seq1Input[i - 1] }}</td>
-            <td class="relative cell"
-              :class="{ 'cellOneAlignment': oneAligment.find(obj => obj.i === i && obj.j === j) !== undefined }"
-              v-for="(cell, j) in row" :key="'cell-' + i + '-' + j">
-              {{ cell.first }}
-              <span v-if="cell.second[0] == '1'"
-                class="absolute top-1 left-1 transform -translate-x-1/2 -translate-y-1/2">↖</span>
-              <span v-if="cell.second[1] == '1'"
-                class="absolute top-1.5 left-1/2 transform -translate-x-1/2 -translate-y-1/2">↑</span>
-              <span v-if="cell.second[2] == '1'"
-                class="absolute left-1 top-1/2 transform -translate-x-1/2 -translate-y-1/2">←</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="justify-center items-center p-6 flex flex-col">
+      <h5>Cantidad de Alineamientos {{ cnt }}</h5>
+      <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
+        <label class="block text-gray-700 text-sm font-bold mr-5">
+          Alineamiento {{ index + 1 }}:
+        </label>
+        <table>
+          <tbody>
+            <tr>
+              <td v-for="(char, idx) in alignment.seq1" :key="'seq1-' + idx" :class="getColorByChar(char)"
+                class="cellAlignment">
+                {{ char }}
+              </td>
+            </tr>
+            <tr>
+              <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" :class="getColorByChar(char)"
+                class="cellAlignment">
+                {{ char }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="justify-center items-center p-6 flex flex-col">
+      <h5>Maximo score: {{ score }}</h5>
+      <div class="text-xs overflow-x-auto shadow-md rounded-lg">
+        <table class="min-w-max w-full">
+          <thead class="bg-blue-600 text-white">
+            <tr>
+              <th class="px-4 py-2 border bg-blue-200 border-blue-200 cell"></th>
+              <th class="px-4 py-2 border bg-blue-200 border-blue-200 cell">-</th>
+              <th class="px-4 py-2 border border-blue-800 cell" v-for="(char, index) in seq2Input"
+                :key="'top-' + index">
+                {{ char }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white">
+            <tr v-for="(row, i) in mx" :key="'row-' + i">
+              <td class="px-4 py-2 border text-white bg-blue-200 border-blue-200 cell" v-if="i === 0">-</td>
+              <td class="px-4 py-2 border bg-blue-600 text-white cell" v-else>{{ seq1Input[i - 1] }}</td>
+              <td class="relative cell"
+                :class="{ 'cellOneAlignment': oneAligment.find(obj => obj.i === i && obj.j === j) !== undefined }"
+                v-for="(cell, j) in row" :key="'cell-' + i + '-' + j">
+                {{ cell.first }}
+                <span v-if="cell.second[0] == '1'"
+                  class="absolute top-1 left-1 transform -translate-x-1/2 -translate-y-1/2">↖</span>
+                <span v-if="cell.second[1] == '1'"
+                  class="absolute top-1.5 left-1/2 transform -translate-x-1/2 -translate-y-1/2">↑</span>
+                <span v-if="cell.second[2] == '1'"
+                  class="absolute left-1 top-1/2 transform -translate-x-1/2 -translate-y-1/2">←</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 
-let seq1Input = '';
-let seq2Input = '';
+let seq1Input = ''
+let seq2Input = ''
+
 const gapPenalty = ref(-2);
 const mismatchPenalty = ref(-1);
 const submitting = ref(false);
@@ -116,6 +127,8 @@ const mx = ref([]);
 const cnt = ref(0);
 const score = ref(0);
 let oneAligment = [];
+const type = ref(null);
+const errors = ref({});
 
 const calculate = (f, c, str0, str1, seq1, seq2) => {
   if (cnt.value >= 100) return
@@ -144,19 +157,31 @@ const calculateOne = (f, c) => {
 }
 
 const NeedlemanWunsch = () => {
-  // fix/verify if string are ADN and ARN
-  cnt.value = 0
   submitting.value = false
-  oneAligment = [];
-  
+  console.log('type')
+  seq1Input = seq1Input.toLowerCase();
+  seq2Input = seq2Input.toLowerCase();
+  errors.value = {}
+
+
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
   let lenSeq2 = seq2.length
 
+  cnt.value = 0
+  oneAligment = []
+
 
   mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
   alignments.value = []
+
+
+  if (validateInputs([seq1Input, seq2Input], errors)) {
+    return
+  }
+
+  type.value = determineType(seq1Input)
 
   for (let i = 1; i < lenSeq1; i++) {
     mx.value[i][0].first = mx.value[i - 1][0].first + gapPenalty.value;
