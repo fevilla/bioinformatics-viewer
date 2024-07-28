@@ -1,6 +1,6 @@
 <template>
   <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Smith Waterman - Alineamiento local</h5>
-  <div class="font-sans p-6 flex">
+  <div class="font-sans p-6 justify-center flex">
     <div class="w-full max-w-sm">
       <form @submit.prevent="smithWaterman" class="rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
@@ -126,7 +126,7 @@ const alignments = ref([]);
 const mx = ref([]);
 const cnt = ref(0);
 const score = ref(0);
-const type = ref(null);
+const type = ref('');
 const errors = ref({})
 const maxLen = ref(null);
 let positionAlignment = []
@@ -168,6 +168,21 @@ const calculateOne = () => {
   }
 }
 
+const cleanValues = (lenSeq1, lenSeq2) => {
+  submitting.value = false;
+  alignments.value = [];
+  cnt.value = 0;
+  score.value = null;
+  type.value = '';
+  errors.value = {}
+  maxLen.value = Math.max(lenSeq1, lenSeq2);
+  positionAlignment = []
+  positionAlignmentFig = []
+  oneAligment = [];
+  mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
+}
+
+
 function padStartCustom(sequence, maxLength) {
   const lengthToAdd = maxLength - sequence.length;
   if (lengthToAdd > 0) return '-'.repeat(lengthToAdd) + sequence;
@@ -175,29 +190,17 @@ function padStartCustom(sequence, maxLength) {
 }
 
 const smithWaterman = () => {
-  submitting.value = false
   seq1Input = seq1Input.toLowerCase();
   seq2Input = seq2Input.toLowerCase();
-  positionAlignment = []
-  positionAlignmentFig = []
-  oneAligment = [];
-  errors.value = {}
-  alignments.value = []
-
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
   let lenSeq2 = seq2.length
+  cleanValues(lenSeq1, lenSeq2)
 
-  maxLen.value = Math.max(lenSeq1, lenSeq2)
-
-  cnt.value = 0
   let scores = []
-  mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
-  alignments.value = []
-
   if (validateInputs([seq1Input, seq2Input], errors)) return
-  type.value = determineType(seq1Input)
+  type.value = determineType(seq1Input)[0]
 
   for (let i = 1; i < lenSeq1; i++) {
     mx.value[i][0].first = 0

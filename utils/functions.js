@@ -53,48 +53,20 @@ export const getColorByChar = (char) => {
 };
 
 export const determineType = (sequence) => {
-  const dnaBases = new Set(['a', 't', 'c', 'g']);
-  const rnaBases = new Set(['a', 'u', 'c', 'g']);
-  const proteinBases = new Set([
-    'a',
-    'r',
-    'n',
-    'd',
-    'c',
-    'e',
-    'q',
-    'g',
-    'h',
-    'i',
-    'l',
-    'k',
-    'm',
-    'f',
-    'p',
-    's',
-    't',
-    'w',
-    'y',
-    'v',
-  ]);
+  const types = [];
+  const isRNA = /^[AUCG]+$/i.test(sequence);
+  const isDNA = /^[ATCG]+$/i.test(sequence);
+  const isProtein = /^[ACDEFGHIKLMNPQRSTVWY]+$/i.test(sequence);
 
-  let isDNA = true,
-    isRNA = true,
-    isProtein = true;
+  if (isRNA) types.push('RNA');
+  if (isDNA) types.push('DNA');
+  if (isProtein) types.push('PROTEIN');
 
-  sequence = sequence.toLowerCase();
-
-  for (let c of sequence) {
-    if (!dnaBases.has(c)) isDNA = false;
-    if (!rnaBases.has(c)) isRNA = false;
-    if (!proteinBases.has(c)) isProtein = false;
-    if (!isDNA && !isRNA && !isProtein) return 'UNKNOWN';
+  if (types.length === 0) {
+    types.push('UNKNOWN');
   }
 
-  if (isDNA) return 'DNA';
-  if (isRNA) return 'RNA';
-  if (isProtein) return 'PROTEIN';
-  return 'UNKNOWN';
+  return types;
 };
 
 export const validateInputLen = (sequences, errors) => {
@@ -115,18 +87,21 @@ export const validateInputLen = (sequences, errors) => {
 };
 
 export const validateInputType = (sequences, errors) => {
-  let _type = determineType(sequences[0]);
+  let _types = determineType(sequences[0]);
   for (let i = 0; i < sequences.length; i++) {
     const _i = i + 1;
     const sequence = sequences[i];
-    const type = determineType(sequence);
-    if (type === 'UNKNOWN') {
-      errors.value.type = ['Las secuencia' + _i + ' es de tipo desconocido'];
+    const types = determineType(sequence);
+
+    if (types.includes('UNKNOWN')) {
+      errors.value.type = ['La secuencia ' + _i + ' es de tipo desconocido'];
       return true;
     }
-    if (_type != type) {
+
+    const commonTypes = _types.filter((type) => types.includes(type));
+    if (commonTypes.length === 0) {
       errors.value.type = ['Las secuencias no son del mismo tipo'];
-      _type = type;
+      _types = types;
       return true;
     }
   }

@@ -1,7 +1,10 @@
 <template>
-    <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Needleman Wunsch - Alineamiento global</h5>
-    <div class="font-sans justify-center items-center p-6 flex">
-        <div class="w-full max-w-5xl">
+    <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Alineamiento Global de proteinas</h5>
+    <div class="font-sans justify-center p-6 flex">
+        <p>El Algoritmo implementado usa la matriz <b>BLOSUM50</b></p>
+    </div>
+    <div class="font-sans justify-center p-6 flex">
+        <div class="w-full max-w-sm">
             <form @submit.prevent="NeedlemanWunsch" class="rounded px-8 pt-6 pb-8 mb-4">
                 <div class="mb-4">
                     <label for="seq1" class="block text-gray-700 text-sm font-bold mb-2">
@@ -10,12 +13,22 @@
                     <input id="seq1" v-model="seq1Input" type="text" placeholder="Introduce la primera secuencia"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required>
+                    <InputError :codeErrors="errors.seq1"></InputError>
                 </div>
                 <div class="mb-6">
                     <label for="seq2" class="block text-gray-700 text-sm font-bold mb-2">
                         Secuencia 2:
                     </label>
                     <input id="seq2" v-model="seq2Input" type="text" placeholder="Introduce la segunda secuencia"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required>
+                    <InputError :codeErrors="errors.seq1"></InputError>
+                </div>
+                <div class="mb-4">
+                    <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+                        Penalidad por gap:
+                    </label>
+                    <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required>
                 </div>
@@ -26,15 +39,24 @@
                         Computar alineamientos óptimos
                     </button>
                 </div>
+                <InputError :codeErrors="errors.type"></InputError>
             </form>
+        </div>
+        <div v-if="submitting" class="font-sans">
+            <div class="p-9 flex flex-col">
+                <h5><b>Secuencia 1:</b> {{ seq1Input }}</h5>
+                <h5><b>Secuencia 2:</b> {{ seq2Input }}</h5>
+                <h2><b>Tipo:</b> {{ type }}</h2>
+                <h5><b>Cantidad de Alineamientos:</b> {{ cnt }}</h5>
+                <h5><b>Score:</b> {{ score }}</h5>
+            </div>
         </div>
     </div>
     <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-        <h5>Cantidad de Alineamientos {{ cnt }}</h5>
         <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
-            <label class="block text-gray-700 text-sm font-bold mr-5">
-                Alineamiento {{ index + 1 }}:
-            </label>
+            <h1 class="block text-gray-700 text-sm font-bold mr-5">
+                Alineamientoa {{ index + 1 }}:
+            </h1>
             <table>
                 <tbody>
                     <tr>
@@ -54,7 +76,6 @@
         </div>
     </div>
     <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-        <h5>Maximo score: {{ score }}</h5>
         <div class="text-xs overflow-x-auto shadow-md rounded-lg">
             <table class="min-w-max w-full">
                 <thead class="bg-blue-600 text-white">
@@ -93,12 +114,14 @@
 
 let seq1Input = ''
 let seq2Input = ''
-let gap = -8
+const gapPenalty = ref(-8);
 const submitting = ref(false)
 const alignments = ref([])
 const mx = ref([])
 const cnt = ref(0)
 const score = ref(0)
+const errors = ref({})
+const type = ref('');
 let oneAligment = []
 
 const BLOSUM50 = {
@@ -151,35 +174,50 @@ const calculateOne = (f, c) => {
     else if (mx.value[f][c].second[2] === '1') calculateOne(f, c - 1)
 }
 
-const NeedlemanWunsch = () => {
-    // fix/verify if string are ADN and ARN
-    submitting.value = false
 
+const cleanValues = (lenSeq1, lenSeq2) => {
+    mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
+    alignments.value = []
+    oneAligment = []
+    errors.value = {}
+    type.value = ''
+    score.value = 0
+    cnt.value = 0
+    submitting.value = false
+}
+
+const NeedlemanWunsch = () => {
+    seq1Input = seq1Input.toLowerCase();
+    seq2Input = seq2Input.toLowerCase();
     let seq1 = '-' + seq1Input
     let seq2 = '-' + seq2Input
     let lenSeq1 = seq1.length
     let lenSeq2 = seq2.length
+    cleanValues(lenSeq1, lenSeq2)
 
-
-    mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
-    alignments.value = []
-    oneAligment = []
+    if (validateInputs([seq1Input, seq2Input], errors)) return
+    let types = determineType(seq1Input)
+    if (!types.includes('PROTEIN')) {
+        errors.value.type = ['Las secuencias deben de ser PROTEINAS']
+        return
+    }
+    type.value = 'PROTEIN'
 
     for (let i = 1; i < lenSeq1; i++) {
-        mx.value[i][0].first = mx.value[i - 1][0].first + gap
+        mx.value[i][0].first = mx.value[i - 1][0].first + gapPenalty.value
         mx.value[i][0].second = replaceCharAt(mx.value[i][0].second, 1, '1')
     }
 
     for (let i = 1; i < lenSeq2; i++) {
-        mx.value[0][i].first = mx.value[0][i - 1].first + gap;
+        mx.value[0][i].first = mx.value[0][i - 1].first + gapPenalty.value;
         mx.value[0][i].second = replaceCharAt(mx.value[0][i].second, 2, '1')
     }
 
     for (let i = 1; i < lenSeq1; i++) {
         for (let j = 1; j < lenSeq2; j++) {
-            const a = mx.value[i - 1][j - 1].first + BLOSUM50[seq1[i]][seq2[j]];
-            const b = mx.value[i - 1][j].first + gap;
-            const c = mx.value[i][j - 1].first + gap;
+            const a = mx.value[i - 1][j - 1].first + BLOSUM50[seq1[i].toUpperCase()][seq2[j].toUpperCase()];
+            const b = mx.value[i - 1][j].first + gapPenalty.value;
+            const c = mx.value[i][j - 1].first + gapPenalty.value;
             const r = Math.max(a, Math.max(b, c));
             mx.value[i][j].first = r;
             mx.value[i][j].second = (r === a ? '1' : '0') + (r === b ? '1' : '0') + (r === c ? '1' : '0');

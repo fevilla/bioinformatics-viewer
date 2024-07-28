@@ -1,7 +1,7 @@
 <template>
-    <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Needleman Wunsch - Alineamiento global</h5>
-    <div class="font-sans justify-center items-center p-6 flex">
-        <div class="w-full max-w-5xl">
+    <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Alineamiendo de dos secuencias - Matrix Punto</h5>
+    <div class="font-sans justify-center p-6 flex">
+        <div class="w-full max-w-sm">
             <form @submit.prevent="pointMatrix" class="rounded px-8 pt-6 pb-8 mb-4">
                 <div class="mb-4">
                     <label for="seq1" class="block text-gray-700 text-sm font-bold mb-2">
@@ -10,6 +10,8 @@
                     <input id="seq1" v-model="seq1" type="text" placeholder="Introduce la primera secuencia"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required>
+                    <InputError :codeErrors="errors.seq1"></InputError>
+
                 </div>
                 <div class="mb-6">
                     <label for="seq2" class="block text-gray-700 text-sm font-bold mb-2">
@@ -18,15 +20,27 @@
                     <input id="seq2" v-model="seq2" type="text" placeholder="Introduce la segunda secuencia"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required>
+                    <InputError :codeErrors="errors.seq2"></InputError>
+
                 </div>
                 <div class="flex items-center justify-between">
                     <button
                         class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         type="submit">
-                        Computar alineamientos óptimos
+                        Obtener Matriz Punto
                     </button>
                 </div>
+                <InputError :codeErrors="errors.type"></InputError>
             </form>
+        </div>
+        <div v-if="submitting" class="font-sans">
+            <div class="p-9 flex flex-col">
+                <h5><b>Secuencia 1:</b> {{ seq1 }}</h5>
+                <h5><b>Secuencia 2:</b> {{ seq2 }}</h5>
+                <h2><b>Tipo:</b> {{ type }}</h2>
+                <h5><b>Cantidad de Alineamientos:</b> {{ cnt }}</h5>
+                <h5><b>Score:</b> {{ score }}</h5>
+            </div>
         </div>
     </div>
     <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
@@ -95,6 +109,8 @@ const alignments = ref([])
 const mx = ref([])
 const cnt = ref(0)
 const score = ref(0)
+const type = ref(null);
+const errors = ref({})
 let oneAligment = []
 
 
@@ -121,13 +137,22 @@ const calculateOne = (lenSeq1, lenSeq2) => {
 }
 
 const pointMatrix = () => {
-    // fix/verify if string are ADN and ARN
     submitting.value = false
+    seq1 = seq1.toLowerCase();
+    seq2 = seq2.toLowerCase();
     let lenSeq1 = seq1.length
     let lenSeq2 = seq2.length
 
-
+    alignments.value = []
     mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ('')));
+    cnt.value = 0
+    score.value = 0
+    errors.value = {}
+    oneAligment.value = []
+
+    if (validateInputs([seq1, seq2], errors)) return
+    type.value = determineType(seq1)[0]
+
     for (let i = 0; i < lenSeq1; i++) {
         for (let j = 0; j < lenSeq2; j++) {
             if (seq1[i] === seq2[j]) mx.value[i][j] = '•';

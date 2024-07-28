@@ -1,6 +1,6 @@
 <template>
   <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Needleman Wunsch - Alineamiento global</h5>
-  <div class="font-sans p-6 flex">
+  <div class="font-sans  justify-center p-6 flex">
     <div class="w-full max-w-sm">
       <form @submit.prevent="NeedlemanWunsch" class="rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
@@ -133,7 +133,7 @@ const mx = ref([]);
 const cnt = ref(0);
 const score = ref(0);
 let oneAligment = [];
-const type = ref(null);
+const type = ref('');
 const errors = ref({});
 
 const calculate = (f, c, str0, str1, seq1, seq2) => {
@@ -161,30 +161,29 @@ const calculateOne = (f, c) => {
   else if (mx.value[f][c].second[2] === '1') calculateOne(f, c - 1)
 }
 
-const NeedlemanWunsch = () => {
+
+const cleanValues = (lenSeq1, lenSeq2) => {
+  mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
+  alignments.value = []
+  oneAligment = []
+  errors.value = {}
+  type.value = ''
+  score.value = 0
+  cnt.value = 0
   submitting.value = false
+}
+
+const NeedlemanWunsch = () => {
   seq1Input = seq1Input.toLowerCase();
   seq2Input = seq2Input.toLowerCase();
-  errors.value = {}
-
-
   let seq1 = '-' + seq1Input
   let seq2 = '-' + seq2Input
   let lenSeq1 = seq1.length
   let lenSeq2 = seq2.length
-
-  cnt.value = 0
-  oneAligment = []
-
-
-  mx.value = Array.from({ length: lenSeq1 }, () => Array.from({ length: lenSeq2 }, () => ({ first: 0, second: '000' })));
-  alignments.value = []
-
+  cleanValues(lenSeq1, lenSeq2)
 
   if (validateInputs([seq1Input, seq2Input], errors)) return
-
-
-  type.value = determineType(seq1Input)
+  type.value = determineType(seq1Input)[0]
 
   for (let i = 1; i < lenSeq1; i++) {
     mx.value[i][0].first = mx.value[i - 1][0].first + gapPenalty.value;

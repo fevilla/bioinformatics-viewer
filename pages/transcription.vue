@@ -1,6 +1,6 @@
 <template>
     <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Transcripcion</h5>
-    <div class="font-sans p-6 flex">
+    <div class="font-sans p-6 justify-center flex">
         <div class="w-full max-w-sm">
             <form @submit.prevent="Transcripcion" class="rounded px-8 pt-6 pb-8 mb-4">
                 <div class="mb-4">
@@ -68,8 +68,9 @@ const Transcripcion = () => {
     seq1Input = seq1Input.toLowerCase();
 
     if (validateInputs([seq1Input], errors)) return
-    if (determineType(seq1Input) !== 'DNA') {
-        errors.value.seq1 = ['La cadena debe ser tipo DNA para realizar de transcripcion']
+    let types = determineType(seq1Input)
+    if (!types.includes('DNA')) {
+        errors.value.type = ['Las secuencias deben de ser DNA']
         return
     }
     type.value = 'DNA'
