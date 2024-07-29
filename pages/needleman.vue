@@ -4,7 +4,7 @@
     <div class="w-full max-w-sm">
       <form @submit.prevent="NeedlemanWunsch" class="rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
-          <label for="seq1" class="block text-gray-700 text-sm font-bold mb-2">
+          <label for="seq1" class="block text-gray-700 text-sm font-bold mr-2">
             Secuencia 1:
           </label>
           <input id="seq1" v-model="seq1Input" type="text" placeholder="Introduce la primera secuencia"
@@ -12,6 +12,7 @@
             required>
           <InputError :codeErrors="errors.seq1"></InputError>
         </div>
+
         <div class="mb-6">
           <label for="seq2" class="block text-gray-700 text-sm font-bold mb-2">
             Secuencia 2:
@@ -21,23 +22,34 @@
             required>
           <InputError :codeErrors="errors.seq2"></InputError>
         </div>
-        <div class="mb-4">
-          <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
-            Penalidad por gap:
-          </label>
-          <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required>
+        <div class="flex mb-4 space-x-4">
+          <div class="flex-1">
+            <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+              gap:
+            </label>
+            <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required>
+          </div>
+          <div class="flex-1">
+            <label for="matchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+              match:
+            </label>
+            <input id="matchPenalty" v-model.number="matchPenalty" type="number" placeholder="Penalidad por match"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required>
+          </div>
+          <div class="flex-1">
+            <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+              mismatch:
+            </label>
+            <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number"
+              placeholder="Penalidad por mismatch"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required>
+          </div>
         </div>
-        <div class="mb-4">
-          <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
-            Penalidad por mismatch:
-          </label>
-          <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number"
-            placeholder="Penalidad por mismatch"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required>
-        </div>
+
         <div class="flex items-center justify-between">
           <button
             class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -74,6 +86,11 @@
                 {{ char }}
               </td>
             </tr>
+            <!-- <tr>
+              <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" class="cellAlignment">
+                <b v-if="alignment.seq1[idx] == alignment.seq2[idx]">|</b>
+              </td>
+            </tr> -->
             <tr>
               <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" :class="getColorByChar(char)"
                 class="cellAlignment">
@@ -127,6 +144,8 @@ let seq2Input = ''
 
 const gapPenalty = ref(-2);
 const mismatchPenalty = ref(-1);
+const matchPenalty = ref(1);
+
 const submitting = ref(false);
 const alignments = ref([]);
 const mx = ref([]);
@@ -197,7 +216,7 @@ const NeedlemanWunsch = () => {
 
   for (let i = 1; i < lenSeq1; i++) {
     for (let j = 1; j < lenSeq2; j++) {
-      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : mismatchPenalty.value);
+      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? matchPenalty.value : mismatchPenalty.value);
       const b = mx.value[i - 1][j].first + gapPenalty.value;
       const c = mx.value[i][j - 1].first + gapPenalty.value;
       const r = Math.max(a, Math.max(b, c));
@@ -222,7 +241,7 @@ const NeedlemanWunsch = () => {
 }
 
 .cell {
-  border: 1px solid black;
+  border: 1px solid;
   text-align: center;
   width: 20px;
   height: 40px;
@@ -234,7 +253,6 @@ const NeedlemanWunsch = () => {
 }
 
 .cellAlignment {
-  border: 1px solid black;
   text-align: center;
   padding: 0.1rem;
   font-size: 1.0rem;

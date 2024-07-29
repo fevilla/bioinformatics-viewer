@@ -21,22 +21,32 @@
             required>
           <InputError :codeErrors="errors.seq2"></InputError>
         </div>
-        <div class="mb-4">
-          <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
-            Penalidad por gap:
-          </label>
-          <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required>
-        </div>
-        <div class="mb-4">
-          <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
-            Penalidad por mismatch:
-          </label>
-          <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number"
-            placeholder="Penalidad por mismatch"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required>
+        <div class="flex mb-4 space-x-4">
+          <div class="flex-1">
+            <label for="gapPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+              gap:
+            </label>
+            <input id="gapPenalty" v-model.number="gapPenalty" type="number" placeholder="Penalidad por gap"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required>
+          </div>
+          <div class="flex-1">
+            <label for="matchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+              match:
+            </label>
+            <input id="matchPenalty" v-model.number="matchPenalty" type="number" placeholder="Penalidad por match"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required>
+          </div>
+          <div class="flex-1">
+            <label for="mismatchPenalty" class="block text-gray-700 text-sm font-bold mb-2">
+              mismatch:
+            </label>
+            <input id="mismatchPenalty" v-model.number="mismatchPenalty" type="number"
+              placeholder="Penalidad por mismatch"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required>
+          </div>
         </div>
         <div class="flex items-center justify-between">
           <button
@@ -59,10 +69,7 @@
     </div>
   </div>
   <div v-if="submitting" class="font-sans justify-center items-center p-6 flex flex-col">
-    <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 flex">
-      <label class="block text-gray-700 text-sm font-bold mr-5">
-        Alineamiento {{ index + 1 }}:
-      </label>
+    <div v-for="(alignment, index) in alignments" :key="index" class="table-auto mb-4 ">
       <table>
         <tbody>
           <tr>
@@ -121,6 +128,8 @@ let seq2Input = ''
 
 const gapPenalty = ref(-2);
 const mismatchPenalty = ref(-1);
+const matchPenalty = ref(1);
+
 const submitting = ref(false);
 const alignments = ref([]);
 const mx = ref([]);
@@ -214,7 +223,7 @@ const smithWaterman = () => {
 
   for (let i = 1; i < lenSeq1; i++) {
     for (let j = 1; j < lenSeq2; j++) {
-      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? 1 : mismatchPenalty.value);
+      const a = mx.value[i - 1][j - 1].first + (seq1[i] === seq2[j] ? matchPenalty.value : mismatchPenalty.value);
       const b = mx.value[i - 1][j].first + gapPenalty.value;
       const c = mx.value[i][j - 1].first + gapPenalty.value;
       const d = 0;
@@ -277,7 +286,6 @@ const smithWaterman = () => {
 }
 
 .cellAlignment {
-  border: 1px solid black;
   text-align: center;
   padding: 0.1rem;
   font-size: 1.0rem;
