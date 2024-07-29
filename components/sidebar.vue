@@ -50,7 +50,7 @@
             <nuxt-link to="/filogenetic"
                 class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
                 active-class="active">
-                <div>Philogenetic</div>
+                <div>Filogenia</div>
             </nuxt-link>
         </div>
     </div>

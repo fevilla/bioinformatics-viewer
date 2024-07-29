@@ -1,21 +1,48 @@
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold text-center mb-4">Clustering Jerárquico</h1>
+    <h1 class="text-2xl font-bold text-center mb-6">Clustering Jerárquico</h1>
+    <div class="text-section mt-8">
+      <p>El clustering jerárquico es una técnica de análisis de datos que agrupa elementos similares en clústeres de manera jerárquica. Esta técnica es especialmente útil cuando se desea entender la estructura subyacente de los datos, ya que proporciona una representación visual intuitiva a través de un dendrograma, el cual muestra las relaciones de proximidad entre los elementos y los clústeres formados en distintos niveles de similitud.</p>
+
+      <h3 class="text-lg font-bold mt-4">Métodos de Clustering Jerárquico</h3>
+      <p>Existen varios métodos para realizar el clustering jerárquico, cada uno con sus propias características y aplicaciones. Entre los más comunes se encuentran el método de enlace simple, el método de enlace completo y el método de enlace promedio.</p>
+
+      <h4 class="text-md font-bold mt-2">Enlace Simple (Single Linkage)</h4>
+      <p>El método de enlace simple, también conocido como "mínimo enlace", forma clústeres basándose en la distancia mínima entre los puntos de diferentes clústeres. Es decir, la distancia entre dos clústeres se define como la distancia mínima entre cualquier par de puntos en los dos clústeres diferentes.</p>
+
+      <h4 class="text-md font-bold mt-2">Enlace Completo (Complete Linkage)</h4>
+      <p>El método de enlace completo, también conocido como "máximo enlace", utiliza la distancia máxima entre los puntos de diferentes clústeres para determinar la distancia entre los clústeres. En este caso, se asegura que todos los puntos dentro del clúster resultante están a una distancia menor o igual que la especificada.</p>
+
+      <h4 class="text-md font-bold mt-2">Enlace Promedio (Average Linkage)</h4>
+      <p>El método de enlace promedio, también conocido como "promedio de grupo", define la distancia entre dos clústeres como el promedio de las distancias entre todos los pares de puntos en los dos clústeres diferentes. Este enfoque es un compromiso entre el enlace simple y el enlace completo.</p>
+
+    </div>
+    
+    <div class="flex flex-col items-center mb-6 mt-5">
+      <div class="mb-4">
+        <label for="method" class="mr-2 font-semibold">Seleccione el método de aglomeración:</label>
+        <select id="method" v-model="selectedMethod"
+          class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option value="max">Máximo (Complete Linkage)</option>
+          <option value="min">Mínimo (Single Linkage)</option>
+          <option value="avg">Promedio (Average Linkage)</option>
+        </select>
+      </div>
+      
+      <div class="w-full max-w-2xl">
+        <textarea v-model="distanceMatrixInput" placeholder="Introduce la matriz de distancias"
+          class="shadow appearance-none border rounded w-full h-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+      </div>
+    </div>
+    
     <div class="flex justify-center mb-4">
-      <label for="method" class="mr-2">Seleccione el método de aglomeración:</label>
-      <select id="method" v-model="selectedMethod" @change="generateDendrogram">
-        <option value="max">Máximo (Complete Linkage)</option>
-        <option value="min">Mínimo (Single Linkage)</option>
-        <option value="avg">Promedio (Average Linkage)</option>
-      </select>
+      <button @click="generateDendrogram"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+        Generar Dendrograma
+      </button>
     </div>
-    <div class="flex justify-center mb-4">
-      <textarea v-model="distanceMatrixInput" placeholder="Introduce la matriz de distancias" class="w-full h-40 p-2 border"></textarea>
-    </div>
-    <div class="flex justify-center">
-      <button @click="parseMatrix" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">Generar Dendrograma</button>
-    </div>
-    <div ref="dendrogramContainer" class="flex justify-center mt-4"></div>
+    
+    <div ref="dendrogramContainer" class="flex justify-center mt-6"></div>
   </div>
 </template>
 
@@ -70,20 +97,22 @@ onMounted(() => {
 
 function dendrogram(data, options = {}) {
   const {
-    width: width = 420,
-    height: height = 320,
-    hideLabels: hideLabels = false,
-    paddingBottom: paddingBottom = hideLabels ? 20 : 80,
+    width = 640,
+    height = 480,
+    hideLabels = false,
+    paddingBottom = hideLabels ? 20 : 100,
     innerHeight = height - paddingBottom,
     innerWidth = width - 10,
-    paddingLeft = 30,
+    paddingLeft = 50,
     h: cutHeight = undefined,
-    yLabel: yLabel = "↑ Height",
-    colors: colors = d3.schemeTableau10,
-    fontFamily: fontFamily = "Inter, sans-serif",
-    linkColor: linkColor = "grey",
-    fontSize: fontSize = 10,
-    strokeWidth: strokeWidth = 1
+    yLabel = "↑ Height",
+    colors = d3.schemeSet3,
+    fontFamily = "Inter, sans-serif",
+    linkColor = "grey",
+    fontSize = 14,
+    strokeWidth = 2,
+    showWeights = true,
+    weightFontSize = 12,
   } = options;
 
   const svg = d3
@@ -120,7 +149,7 @@ function dendrogram(data, options = {}) {
         !child.parent.color
       ) {
         curIndex++;
-        child.color = colors[curIndex];
+        child.color = colors[curIndex % colors.length];
       } else if (child.parent && child.parent.color) {
         child.color = child.parent.color;
       }
@@ -141,10 +170,12 @@ function dendrogram(data, options = {}) {
       g
         .append("text")
         .attr("x", -paddingLeft)
-        .attr("y", -20)
+        .attr("y", -30)
         .attr("fill", "currentColor")
         .attr("text-anchor", "start")
         .style("font-family", fontFamily)
+        .style("font-size", `${fontSize + 2}px`)
+        .style("font-weight", "bold")
         .text(yLabel)
     )
     .selectAll(".tick")
@@ -154,7 +185,7 @@ function dendrogram(data, options = {}) {
 
   // Links
   root.links().forEach((link) => {
-    svg
+    const linkPath = svg
       .append("path")
       .attr("class", "link")
       .attr("stroke", link.source.color || linkColor)
@@ -162,6 +193,22 @@ function dendrogram(data, options = {}) {
       .attr("fill", "none")
       .attr("transform", `translate(${paddingLeft}, ${hideLabels ? 20 : 0})`)
       .attr("d", elbow(link));
+
+    if (showWeights) {
+      const midX = (link.source.x + link.target.x) / 2;
+      const midY = (transformY(link.source) + transformY(link.target)) / 2;
+      svg
+        .append("text")
+        .attr("text-anchor", "middle")
+        .style("font-size", `${weightFontSize}px`)
+        .style("font-family", fontFamily)
+        .style("font-weight", "bold")
+        .attr(
+          "transform",
+          `translate(${midX + paddingLeft},${midY})`
+        )
+        .text(link.target.data.height);
+    }
   });
 
   // Nodes
@@ -174,6 +221,7 @@ function dendrogram(data, options = {}) {
         .attr("text-anchor", "end")
         .style("font-size", `${fontSize}px`)
         .style("font-family", fontFamily)
+        .style("font-weight", "bold")
         .attr(
           "transform",
           `translate(${desc.x + paddingLeft},${transformY(desc)}) rotate(270)`
@@ -196,6 +244,7 @@ function dendrogram(data, options = {}) {
   }
   return svg.node();
 }
+
 </script>
 
 <style scoped>
@@ -208,6 +257,9 @@ function dendrogram(data, options = {}) {
   font-family: "Inter, sans-serif";
 }
 
+p {
+  text-align: justify
+}
 .link {
   fill: none;
   stroke: #555;
