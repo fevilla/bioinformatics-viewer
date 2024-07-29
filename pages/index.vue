@@ -7,7 +7,7 @@
         <div class="pt-5">
             <p><b>Integrantes:</b></p>
             <p>- Fiorela Estefany Villarroel Ramos</p>
-            <p>- Samuel Felipe chambi Maximiliano</p>
+            <p>- Samuel Felipe Chambi Ytusaca</p>
         </div>
     </div>
 </template>

@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div>
     <h2 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Star Alignment - Alineamiento Multiple</h2>
     <div class="font-sans justify-center items-center p-6 flex">
@@ -34,6 +34,49 @@
           <tr>
             <td v-for="(char, idx) in alignment" :key="'seq1-' + idx" :class="getColorByChar(char)"
               class="cellAlignment">
+              {{ char }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template> -->
+
+Copiar código
+<template>
+  <div>
+    <h2 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Star Alignment - Alineamiento Multiple</h2>
+    <div class="font-sans justify-center items-center p-6 flex">
+      <div class="w-full max-w-5xl bg-white shadow-md rounded-lg p-8">
+        <form @submit.prevent="smithWaterman">
+          <div class="mb-4">
+            <label for="numSequences" class="block text-gray-700 text-sm font-bold mb-2">Número de secuencias:</label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="number" v-model="numSequences" @change="generateSequenceInputs" min="1" />
+          </div>
+          <div v-if="numSequences > 0">
+            <div v-for="(index) in numSequences" :key="index" class="mb-4">
+              <label :for="'seq' + index" class="block text-gray-700 text-sm font-bold mb-2">Secuencia {{ index }}:</label>
+              <input
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                type="text" v-model="sequenceInputs[index - 1]" :id="'seq' + index" />
+            </div>
+            <button
+              class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out"
+              @click="alignSequences">Alinear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="font-sans justify-center items-center p-6 flex flex-col">
+      <h5 class="text-lg font-bold mb-4">Secuencias Alineadas</h5>
+      <table v-for="(alignment, index) in alignedSequences" :key="index" class="table-auto mb-4">
+        <tbody>
+          <tr>
+            <td v-for="(char, idx) in alignment" :key="'seq1-' + idx" :class="getColorByChar(char) + ' cellAlignment px-2 py-1 border'">
               {{ char }}
             </td>
           </tr>
