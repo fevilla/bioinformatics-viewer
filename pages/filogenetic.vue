@@ -23,8 +23,9 @@
         <label class="text-sm font-semibold mb-2">Matriz de Distancias:</label>
         <textarea v-model="inputMatrix" placeholder="Introduce la matriz de distancias:"
           class="w-full h-40 p-2 border rounded"></textarea>
-        <label class="text-sm font-semibold mb-2">Etiquetas:</label>
-        <textarea v-model="inputLabels" placeholder="Introduce las etiquetas:" class="w-full h-10 p-2 border rounded"></textarea>
+        <!-- <label class="text-sm font-semibold mb-2">Etiquetas:</label>
+        <textarea v-model="inputLabels" placeholder="Introduce las etiquetas:" class="w-full h-10 p-2 border rounded"></textarea> -->
+        <InputError :codeErrors="errors.type"></InputError>
       </div>
 
       <!-- Botón para Generar Árbol -->
@@ -46,6 +47,7 @@ const inputMatrix = ref('');
 const inputLabels = ref('');
 const look = ref(false);
 const treeContainer = ref(null);
+const errors = ref({});
 const parseMatrix = () => {
   try {
     let matrix = inputMatrix.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
@@ -66,7 +68,7 @@ const parseMatrix = () => {
       
       matrix = fullMatrix;
     }
-    console.log("MAT: " , matrix);
+    // console.log("MAT: " , matrix);
     if (matrix.length > 30) {
       errors.value.type = ['La matriz debe tener un tamaño máximo de 30x30.'];
       throw new Error('Invalid matrix');
@@ -90,12 +92,14 @@ const parseMatrix = () => {
   }
 };
 const generateTree = () => {
+  errors.value.type = [];
   const matrix = parseMatrix();
-
   console.log(matrix);
-
-  const labels = inputLabels.value.split(' ');
-
+  const labels = [];
+  // const labels = inputLabels.value.split(' ');
+  for(let i = 0 ; i  < matrix.length; i++){
+    labels.push(`SEQ_${i + 1}`)
+  }
   const treeData = neighborJoining(matrix, labels);
   drawPhyloTree(treeData);
 }
