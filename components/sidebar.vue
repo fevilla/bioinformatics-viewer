@@ -24,9 +24,19 @@
             </nuxt-link>
             <nuxt-link to="/starAlignment"
                 class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
-                active-class="active">
-                <div>Alineamiento multiple</div>
+                active-class="active" @click.prevent="toggleDropdown">
+                <div>Alineamiento múltiple</div>
+                <svg :class="{ 'transform rotate-180': dropdownOpen }" class="h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
             </nuxt-link>
+            <div v-show="dropdownOpen" class="pl-20 bg-gray-100">
+                <nuxt-link to="/starAlignment" class="block py-2 text-gray-700 hover:bg-gray-200">Alineamiento
+                    Estrella</nuxt-link>
+                <nuxt-link to="/filogenetic" class="block py-2 text-gray-700 hover:bg-gray-200">Neighbor
+                    Joining</nuxt-link>
+            </div>
             <nuxt-link to="/pointMatrix"
                 class="pr-0 pl-12 py-5 flex items-center gap-3 sidebar-link text-gray-700 hover:text-black font-book hover:font-bold"
                 active-class="active">
@@ -56,7 +66,13 @@
     </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+
+const dropdownOpen = ref(false)
+const toggleDropdown = () => {
+    dropdownOpen.value = !dropdownOpen.value;
+}
+</script>
 
 <style scoped>
 .sidebar-link.active {
