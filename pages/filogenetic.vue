@@ -34,8 +34,8 @@
       </section>
     </div>
     <!-- Contenedor para el Árbol -->
-    <section ref="treeContainer" class="flex justify-center mt-4"></section>
   </div>
+  <section ref="treeContainer" class="flex justify-center mt-4 bg-color-red"></section>
 </template>
 
 <script setup>
@@ -48,11 +48,44 @@ const look = ref(false);
 const treeContainer = ref(null);
 const parseMatrix = () => {
   try {
-    const matrix = inputMatrix.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
-    if (matrix.some(row => row.some(isNaN))) throw new Error('Invalid matrix');
+    let matrix = inputMatrix.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
+    console.log(matrix);
+    
+    // Si la matriz es una diagonal inferior
+    if (matrix.every((row, i) => row.length === i + 1)) {
+      // Autocompletar la matriz
+      const size = matrix.length;
+      const fullMatrix = Array.from({ length: size }, (_, i) => Array(size).fill(0));
+      
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j <= i; j++) {
+          fullMatrix[i][j] = matrix[i][j];
+          fullMatrix[j][i] = matrix[i][j];
+        }
+      }
+      
+      matrix = fullMatrix;
+    }
+    console.log("MAT: " , matrix);
+    if (matrix.length > 30) {
+      errors.value.type = ['La matriz debe tener un tamaño máximo de 30x30.'];
+      throw new Error('Invalid matrix');
+    }
+
+    for (let i = 0; i < matrix.length; i++) {
+      if (matrix[i].length !== matrix.length) {
+        errors.value.type = ['La matriz debe ser cuadrada.'];
+        throw new Error('Invalid matrix');
+      }
+    }
+
+    if (matrix.some(row => row.some(isNaN))) {
+      errors.value.type = ['Por favor, ingrese una matriz de distancias válida.'];
+      throw new Error('Invalid matrix');
+    }
+
     return matrix;
   } catch (error) {
-    alert('Por favor, ingrese una matriz de distancias válida.');
     return null;
   }
 };
@@ -68,8 +101,8 @@ const generateTree = () => {
 }
 
 const drawPhyloTree = (data) => {
-  const width = 800;
-  const height = 600;
+  const width = 1200;
+  const height = 800;
   const margin = 50; // Añadir margen para evitar recortes
 
   // Seleccionar y limpiar el contenedor del árbol
@@ -148,7 +181,7 @@ const drawPhyloTree = (data) => {
     .attr('font-size', '12px') // Aumentar tamaño de fuente
     .attr('font-family', 'Arial, sans-serif') // Fuente más legible
     .attr('font-weight', 'bold')
-    .text(d => d.target.data.distance.toFixed(3));
+    .text(d => d.target.data.distance.toFixed(2));
 };
 </script>
 <style>

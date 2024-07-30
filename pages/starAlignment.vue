@@ -60,6 +60,12 @@
             <button
               class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out"
               @click="alignSequences">Alinear </button>
+              <div v-if="submitting" class="font-sans">
+                <div class="p-9 flex flex-col">
+                  <h5><b>Secuencia Estrella:</b> {{ StarSequence }}</h5>
+                  <h5><b>Score:</b> {{ globalScore }}</h5>
+                </div>
+              </div>
           </div>
           <InputError v-if="errors && errors.value" :codeErrors="errors.value.type"></InputError>
 
@@ -99,7 +105,9 @@ export default {
       gapPenalty: -2,
       matchPenalty: 1,
       mismatchPenalty: -1,
-      errors: {}
+      errors: {},
+      submitting: false,
+      StarSequence: '',
     };
   },
   methods: {
@@ -160,6 +168,7 @@ export default {
       return starIndex;
     },
     alignSequences() {
+      this.submitting = false;
       const sequences = this.sequenceInputs;
       this.alignedSequences = []
       this.globalScore = 0
@@ -171,6 +180,7 @@ export default {
       const starIndex = this.findStarSequence(scoreMatrix);
       const alignedSequences = this.multipleSequenceAlignment(sequences, starIndex);
       this.alignedSequences = alignedSequences;
+      this.submitting = true;
     },
 
     alignPair(seq1, seq2) {
@@ -190,7 +200,7 @@ export default {
           );
         }
       }
-      console.log("Distance matrix: " , dp);
+
       let alignedSeq1 = '';
       let alignedSeq2 = '';
       let i = m, j = n;
@@ -228,7 +238,7 @@ export default {
         alignedSeq2 = seq2[j - 1] + alignedSeq2;
         --j;
       }
-      console.log("PRES: " , alignedSeq1 , alignedSeq2);
+
       return [alignedSeq1, alignedSeq2];
     },
 
@@ -292,13 +302,12 @@ export default {
       }
 
       let balance = alignedSequences[0][0];
-      console.log("Alineciones guardadas: ", alignedSequences)
       for (let i = 1; i < n - 1; i++) {
         if (balance === alignedSequences[i][0]) continue;
         balance = this.balanceSequence(balance, alignedSequences[i][0]);
       }
-      console.log("Alineciones guardadas despues: ", alignedSequences)
-      console.log("STAR: ", balance)
+      
+      this.StarSequence = balance;
       const result = [balance];
 
       for (let i = 0; i < n - 1; i++) {

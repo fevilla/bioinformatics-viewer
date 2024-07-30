@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold text-center mb-6">Clustering Jerárquico</h1>
+    <h1 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Clustering Jerárquico</h1>
     <button @click="look = !look"
       class="text-section mt-8 rounded focus:outline-none font-bold focus:shadow-outline transition duration-150 ease-in-out">
       >
@@ -60,8 +60,8 @@
       </button>
     </div>
 
-    <div ref="dendrogramContainer" class="flex justify-center mt-6"></div>
   </div>
+  <div ref="dendrogramContainer" class="flex justify-center mt-6"></div>
 </template>
 
 <script setup>
@@ -101,31 +101,50 @@ const generateDendrogram = () => {
   dendrogramContainer.value.innerHTML = ''; // Limpiar el contenedor
   dendrogramContainer.value.appendChild(svgElement);
 };
-
 const parseMatrix = () => {
   try {
-    const matrix = distanceMatrixInput.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
-    console.log(matrix)
+    let matrix = distanceMatrixInput.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
+    console.log(matrix);
+    
+    // Si la matriz es una diagonal inferior
+    if (matrix.every((row, i) => row.length === i + 1)) {
+      // Autocompletar la matriz
+      const size = matrix.length;
+      const fullMatrix = Array.from({ length: size }, (_, i) => Array(size).fill(0));
+      
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j <= i; j++) {
+          fullMatrix[i][j] = matrix[i][j];
+          fullMatrix[j][i] = matrix[i][j];
+        }
+      }
+      
+      matrix = fullMatrix;
+    }
+    console.log("MAT: " , matrix);
     if (matrix.length > 30) {
-      errors.value.type = ['La matriz debe tener un tamaño máximo de 30x30.']
+      errors.value.type = ['La matriz debe tener un tamaño máximo de 30x30.'];
       throw new Error('Invalid matrix');
     }
+
     for (let i = 0; i < matrix.length; i++) {
       if (matrix[i].length !== matrix.length) {
-        errors.value.type = ['La matriz debe ser cuadrada.']
+        errors.value.type = ['La matriz debe ser cuadrada.'];
         throw new Error('Invalid matrix');
-        break
       }
     }
+
     if (matrix.some(row => row.some(isNaN))) {
-      errors.value.type = ['Por favor, ingrese una matriz de distancias válida.']
+      errors.value.type = ['Por favor, ingrese una matriz de distancias válida.'];
       throw new Error('Invalid matrix');
     }
+
     return matrix;
   } catch (error) {
     return null;
   }
 };
+
 
 onMounted(() => {
 });
