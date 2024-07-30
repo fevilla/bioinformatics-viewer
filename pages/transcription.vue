@@ -1,5 +1,9 @@
 <template>
     <h5 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Transcripcion</h5>
+    <div class="container mx-auto p-4">
+            <h2 class="text-xl font-bold mb-4">¿Qué es la transcripción?</h2>
+            <p class="justify-text">La transcripción es el primer paso en la expresión génica, en el cual se copia una secuencia de ADN para producir una molécula complementaria de ARN. Este proceso es fundamental para la transferencia de la información genética desde el ADN, que se encuentra en el núcleo de las células eucariotas, hasta el citoplasma, donde se lleva a cabo la síntesis de proteínas.</p>
+    </div>
     <div class="font-sans p-6 justify-center flex">
         <div class="w-full max-w-sm">
             <form @submit.prevent="Transcripcion" class="rounded px-8 pt-6 pb-8 mb-4">
@@ -104,5 +108,9 @@ const Transcripcion = () => {
     padding: 0.1rem;
     font-size: 1.0rem;
     min-width: 30px;
+}
+
+.justify-text {
+  text-align: justify;
 }
 </style>

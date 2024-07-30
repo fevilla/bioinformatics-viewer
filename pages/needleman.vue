@@ -86,11 +86,6 @@
                 {{ char }}
               </td>
             </tr>
-            <!-- <tr>
-              <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" class="cellAlignment">
-                <b v-if="alignment.seq1[idx] == alignment.seq2[idx]">|</b>
-              </td>
-            </tr> -->
             <tr>
               <td v-for="(char, idx) in alignment.seq2" :key="'seq2-' + idx" :class="getColorByChar(char)"
                 class="cellAlignment">

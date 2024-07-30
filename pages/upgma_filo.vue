@@ -1,51 +1,48 @@
 <template>
-  <div class="container mx-auto p-4">
-    <h2 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Neighbor Joining - Alinemiento múltiple</h2>
-    <button @click="look = !look"
-      class="text-section mt-8 rounded focus:outline-none font-bold focus:shadow-outline transition duration-150 ease-in-out">
-      >
-      <span v-if="look">Ocultar Informacion</span> <span v-else>Ver Informacion</span>
-    </button>
-    <div v-if="look" class="text-section">
-      <h2 class="text-xl font-bold mb-4">Introducción al Método Neighbor Joining</h2>
-      <p class="justify-text">El método Neighbor Joining es una técnica utilizada para construir árboles filogenéticos
-        basados en matrices de distancias. Este método es eficiente para inferir relaciones evolutivas entre especies o
-        secuencias, minimizando la longitud total del árbol para crear una estructura clara que representa las
-        relaciones evolutivas.</p>
-      <p class="justify-text">Neighbor Joining agrupa iterativamente los taxones que están más cerca uno del otro, y a
-        partir de una matriz de distancias, construye un árbol no enraizado que puede ser enraizado posteriormente si se
-        dispone de un outgroup adecuado.</p>
-    </div>
+    <div class="container mx-auto p-4">
+        <h1 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Árboles Filogenéticos</h1>
+        <!-- Introducción -->
+        <button @click="look = !look"
+        class="text-section mt-8 rounded focus:outline-none font-bold focus:shadow-outline transition duration-150 ease-in-out">
+        >
+            <span v-if="look">Ocultar Información</span> <span v-else>Ver Información</span>
+        </button>
+        <div v-if="look" class="text-section">
+            <p class="justify-text">Los árboles filogenéticos son diagramas ramificados que representan las relaciones evolutivas entre diferentes especies u otros grupos taxonómicos basados en similitudes y diferencias en sus características físicas o genéticas. Estos árboles nos permiten visualizar cómo las especies han evolucionado a lo largo del tiempo a partir de ancestros comunes.</p>
+            <h2 class="text-xl font-bold mb-4">Introducción al Método UPGMA</h2>
+            <p class="justify-text">El método UPGMA (Unweighted Pair Group Method with Arithmetic Mean) es una técnica utilizada para construir árboles filogenéticos basados en matrices de distancias. Este método agrupa iterativamente los taxones más cercanos, calculando las distancias promedio, y construye un árbol filogenético jerárquico.</p>
+        </div>
 
-    <!-- Entrada de Datos -->
-    <div class="flex flex-col items-center mb-6 mt-5">
-      <div class="w-full max-w-2xl mb-6">
-        <label class="text-sm font-semibold mb-2">Matriz de Distancias:</label>
-        <textarea v-model="inputMatrix" placeholder="Introduce la matriz de distancias:"
-          class="w-full h-40 p-2 border rounded"></textarea>
-        <label class="text-sm font-semibold mb-2">Etiquetas:</label>
-        <textarea v-model="inputLabels" placeholder="Introduce las etiquetas:" class="w-full h-10 p-2 border rounded"></textarea>
-      </div>
+        <!-- Entrada de Datos -->
+        <div class="flex flex-col items-center mb-6 mt-5">
+        <div class="w-full max-w-2xl mb-6">
+            <label class="text-sm font-semibold mb-2">Matriz de Distancias:</label>
+            <textarea v-model="inputMatrix" placeholder="Introduce la matriz de distancias:"
+            class="w-full h-40 p-2 border rounded"></textarea>
+            <label class="text-sm font-semibold mb-2">Etiquetas:</label>
+            <textarea v-model="inputLabels" placeholder="Introduce las etiquetas:"
+            class="shadow appearance-none border rounded w-full h-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+        </div>
 
-      <!-- Botón para Generar Árbol -->
-      <section class="flex justify-center mb-6">
-        <button @click="generateTree" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">Generar
-          Árbol</button>
-      </section>
+        <!-- Botón para Generar Árbol -->
+        <section class="flex justify-center mb-6">
+            <button @click="generateTree" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">Generar Árbol</button>
+        </section>
+        </div>
+        <!-- Contenedor para el Árbol -->
+        <section ref="treeContainer" class="flex justify-center mt-4"></section>
     </div>
-    <!-- Contenedor para el Árbol -->
-    <section ref="treeContainer" class="flex justify-center mt-4"></section>
-  </div>
 </template>
 
 <script setup>
 import * as d3 from 'd3';
-import { neighborJoining } from '~/utils/neighborJoining.js';
+import { upgma } from '~/utils/upgma.js';
 
 const inputMatrix = ref('');
 const inputLabels = ref('');
 const look = ref(false);
 const treeContainer = ref(null);
+
 const parseMatrix = () => {
   try {
     const matrix = inputMatrix.value.trim().split('\n').map(row => row.trim().split(/\s+/).map(Number));
@@ -56,16 +53,16 @@ const parseMatrix = () => {
     return null;
   }
 };
+
 const generateTree = () => {
   const matrix = parseMatrix();
+  if (!matrix) return;
 
-  console.log(matrix);
+  const labels = inputLabels.value.split(/\s+/);
 
-  const labels = inputLabels.value.split(' ');
-
-  const treeData = neighborJoining(matrix, labels);
+  const treeData = upgma(matrix, labels);
   drawPhyloTree(treeData);
-}
+};
 
 const drawPhyloTree = (data) => {
   const width = 800;
@@ -152,12 +149,12 @@ const drawPhyloTree = (data) => {
 };
 </script>
 <style>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-}
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
 
-p {
-  text-align: justify;
-}
+    p {
+        text-align: justify;
+    }
 </style>

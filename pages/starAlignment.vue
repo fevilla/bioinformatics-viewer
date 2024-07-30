@@ -1,59 +1,24 @@
-<!-- <template>
-  <div>
-    <h2 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Star Alignment - Alineamiento Multiple</h2>
-    <div class="font-sans justify-center items-center p-6 flex">
-      <div class="w-full max-w-5xl">
-        <form @submit.prevent="smithWaterman" class="rounded px-8 pt-6 pb-8 mb-4">
-          <div>
-            <label for="numSequences" class="block text-gray-700 text-sm font-bold mb-2">Número de secuencias: </label>
-            <input
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              type="number" v-model="numSequences" @change="generateSequenceInputs" min="1" />
-          </div>
-          <div v-if="numSequences > 0">
-            <div v-for="(index) in numSequences" :key="index">
-              <label :for="'seq' + index" class="block text-gray-700 text-sm font-bold mb-2"> Secuencia {{ index }}
-                :</label>
-              <input
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                type="text" v-model="sequenceInputs[index - 1]" :id="'seq' + index" />
-            </div>
-            <button
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              @click="alignSequences">Alinear</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-
-    <div class="font-sans justify-center items-center p-6 flex flex-col">
-      <h5>Secuencias Alineadas</h5>
-      <table v-for="(alignment, index) in alignedSequences" :key="index" class="table-auto mb-4">
-        <tbody>
-          <tr>
-            <td v-for="(char, idx) in alignment" :key="'seq1-' + idx" :class="getColorByChar(char)"
-              class="cellAlignment">
-              {{ char }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</template> -->
-
-Copiar código
 <template>
-  <div>
+  <div class="container mx-auto p-4">
     <h2 class="text-xl text-center font-black pb-6 pt-9 sm:pt-14">Star Alignment - Alineamiento Multiple</h2>
+    <button @click="look = !look"
+      class="text-section mt-8 rounded focus:outline-none font-bold focus:shadow-outline transition duration-150 ease-in-out">
+      >
+      <span v-if="look">Ocultar Informacion</span> <span v-else>Ver Informacion</span>
+    </button>
+    <div v-if="look" class="text-section">
+      <!-- <h2 class="text-xl font-bold mb-4">Introducción al Método Neighbor Joining</h2> -->
+      <p class="justify-text">El alineamiento múltiple de secuencias (MSA, por sus siglas en inglés) es una herramienta fundamental en la bioinformática y la biología evolutiva. Se utiliza para comparar tres o más secuencias biológicas (ya sean ADN, ARN o proteínas) y determinar las regiones de similitud y diferencia entre ellas. Estas regiones pueden proporcionar información sobre la funcionalidad, estructura y evolución de las secuencias.</p>
+      <h2 class="text-xl font-bold mb-4">Introducción al Star Alignment</h2>
+      <p class="justify-text">El Star Alignment es un enfoque utilizado para el alineamiento múltiple de secuencias (MSA) que se basa en la selección de una secuencia central o "estrella" como referencia para alinear todas las demás secuencias. Este método es conocido por su simplicidad y eficiencia, especialmente adecuado para conjuntos de datos donde una secuencia de referencia es claramente identificable.</p>
+    </div>
     <div class="font-sans justify-center items-center p-6 flex">
       <div class="w-full max-w-sm bg-white shadow-md rounded-lg p-8">
         <form @submit.prevent="smithWaterman">
           <div class="mb-4">
             <label for="numSequences" class="block text-gray-700 text-sm font-bold mb-2">Número de secuencias:</label>
             <input
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               type="number" v-model="numSequences" min="2" />
           </div>
           <div v-if="numSequences > 0">
@@ -117,8 +82,11 @@ Copiar código
     </div>
   </div>
 </template>
-
+<script setup>
+const look = ref(false)
+</script>
 <script>
+
 export default {
   data() {
     return {
@@ -209,7 +177,7 @@ export default {
       const m = seq1.length;
       const n = seq2.length;
       const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-
+      console.log(dp);
       for (let i = 0; i <= m; ++i) dp[i][0] = i * this.gapPenalty;
       for (let j = 0; j <= n; ++j) dp[0][j] = j * this.gapPenalty;
 
@@ -222,7 +190,7 @@ export default {
           );
         }
       }
-
+      console.log("Distance matrix: " , dp);
       let alignedSeq1 = '';
       let alignedSeq2 = '';
       let i = m, j = n;
@@ -233,29 +201,34 @@ export default {
           alignedSeq2 = seq2[j - 1] + alignedSeq2;
           --i;
           --j;
+          console.log("DIAGONAL")
         } else if (i > 0 && dp[i][j] === dp[i - 1][j] + this.gapPenalty) {
           alignedSeq1 = seq1[i - 1] + alignedSeq1;
           alignedSeq2 = '-' + alignedSeq2;
           --i;
+          console.log("ARRIBA")
         } else {
           alignedSeq1 = '-' + alignedSeq1;
           alignedSeq2 = seq2[j - 1] + alignedSeq2;
+          console.log("IZQUIERDA")
           --j;
         }
       }
-
       while (i > 0) {
         console.log("i:", i)
         alignedSeq1 = seq1[i - 1] + alignedSeq1;
+        alignedSeq2 = '-' + alignedSeq2;
         --i;
       }
-
+      
+      
       while (j > 0) {
         console.log("j: ", j)
         alignedSeq1 = '-' + alignedSeq1;
         alignedSeq2 = seq2[j - 1] + alignedSeq2;
         --j;
       }
+      console.log("PRES: " , alignedSeq1 , alignedSeq2);
       return [alignedSeq1, alignedSeq2];
     },
 
@@ -327,11 +300,12 @@ export default {
       console.log("Alineciones guardadas despues: ", alignedSequences)
       console.log("STAR: ", balance)
       const result = [balance];
+
       for (let i = 0; i < n - 1; i++) {
         let r = '';
         let m = 0;
         for (const element of balance) {
-          if (element === alignedSequences[i][0][m]) {
+          if (element === alignedSequences[i][0][m] && alignedSequences[i][1][m]) {
             r += alignedSequences[i][1][m++];
           }
           else {
@@ -360,7 +334,6 @@ button {
 }
 
 .cellAlignment {
-  border: 1px solid black;
   text-align: center;
   padding: 0.1rem;
   font-size: 1.0rem;

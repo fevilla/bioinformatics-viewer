@@ -1,62 +1,55 @@
-// utils/neighborJoining.js
-export function neighborJoining(matrix, labels) {
+// utils/upgma.js
+export function upgma(matrix, labels) {
     let nodes = labels.map((label, i) => ({ name: label, index: i, children: [] }));
+    const n = matrix.length;
+
+    // Helper function to calculate the average distance between clusters
+    const calculateAverageDistance = (cluster, distances) => {
+        const size = cluster.length;
+        let totalDistance = 0;
+        for (let i = 0; i < size; i++) {
+            for (let j = i + 1; j < size; j++) {
+                totalDistance += distances[cluster[i]][cluster[j]];
+            }
+        }
+        return totalDistance / (size * (size - 1) / 2);
+    };
+
     while (nodes.length > 2) {
-        const n = nodes.length;
-        const totalD = Array(n).fill(0);
-        const R = Array(n).fill(0);
-        let D_s = [];
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n; j++) {
-                totalD[i] += matrix[i][j];
-            }
-        }
-
-        for(let i = 0 ;  i < n; i++){
-            let row = [];
-            for(let j = 0 ; j < n; j++){
-                if(i != j)
-                    row[j] = (n - 2) * matrix[i][j] - totalD[i] - totalD[j];
-                else
-                    row[j] = 0;
-            }
-            D_s.push(row);
-        }
-
-        let minVal = Infinity;
+        let minDistance = Infinity;
         let minIndices = [-1, -1];
-
-        for (let i = 0; i < D_s.length; i++) {
-            for (let j = 0; j < D_s[i].length; j++) {
-                if (D_s[i][j] < minVal) {
-                    minVal = D_s[i][j];
+        const n = nodes.length;
+        // Find the closest pair of clusters
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                if (matrix[i][j] < minDistance) {
+                    minDistance = matrix[i][j];
                     minIndices = [i, j];
                 }
             }
         }
-    
-        let a = minIndices[0];
-        let b = minIndices[1];
-        let delta = (totalD[a] - totalD[b]) / (n - 2);
 
-        const distAtoB = matrix[a][b];
-        const newDistA = (distAtoB + delta) / 2;
-        const newDistB = distAtoB - newDistA;
-
+        const [a, b] = minIndices;
+        const newDist = matrix[a][b] / 2;
         const newNode = {
             name: `Node_${nodes.length}`,
             children: [
-                { ...nodes[a], distance: newDistA },
-                { ...nodes[b], distance: newDistB },
+                { ...nodes[a], distance: newDist },
+                { ...nodes[b], distance: newDist },
             ],
             index: nodes.length,
         };
-        
-        let newMatrix = [];
+
+        // Update matrix
+        const clusterA = a;
+        const clusterB = b;
+        let newMatrix = []
         let newRow = [0];
+        console.log("NEW: " , matrix)
+
         for (let i = 0; i < n; i++) {
             if (i !== a && i !== b) {
-                const newDist = (matrix[i][a] + matrix[i][b] - distAtoB) / 2;
+                const newDist = (matrix[i][a] + matrix[i][b]) / 2;
                 newRow.push(newDist);
             }
         }
@@ -87,15 +80,15 @@ export function neighborJoining(matrix, labels) {
             }
         }
         newMatrix = completeMatrix;
-
-        matrix = newMatrix;
-        nodes = nodes.filter((_, i) => i !== a && i !== b);
+        // Remove the old rows and columns for clusters A and B
+        
+        nodes = nodes.filter((_, index) => index !== clusterA && index !== clusterB);
         nodes.unshift(newNode);
+        matrix = newMatrix;
     }
     const aux = nodes[1];
     nodes = nodes[0];
-    nodes.children.push({...aux, distance: matrix[0][1]})
+    nodes.children.push({...aux, distance: matrix[0][1] / 2})
     console.log(nodes)
     return nodes;
-  }
-  
+}

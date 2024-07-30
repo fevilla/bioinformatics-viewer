@@ -4,7 +4,7 @@
     <button @click="look = !look"
       class="text-section mt-8 rounded focus:outline-none font-bold focus:shadow-outline transition duration-150 ease-in-out">
       >
-      <span v-if="look">Ocultar Informacion</span> <span v-else>Ver Intormacion</span>
+      <span v-if="look">Ocultar Información</span> <span v-else>Ver Información</span>
     </button>
     <div v-if="look" class="text-section">
       <p>El clustering jerárquico es una técnica de análisis de datos que agrupa elementos similares en clústeres de
